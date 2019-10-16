@@ -164,6 +164,7 @@ class ellipsoid:
                 Mtot=c*m
                 if c>1:
                     shape[i][j]=s/(c-1)
+                print("particle count for %g<R<%g=%d"%(Rin,Rout,c))
         return shape
 def CompareEllipsoids(ell1,ell2):
     AreSame=False;
