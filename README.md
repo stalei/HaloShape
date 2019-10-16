@@ -1,2 +1,1 @@
-# HaloShape
-Dark matter halo inner structure and shape analysis
+# HaloShapeThe inner structure of the halo using eigenvalues and eigenvectors of the shape tensor.
