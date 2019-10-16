@@ -173,21 +173,24 @@ def CompareEllipsoids(ell1,ell2):
     dRatio=np.array([0,0])
     #dax=np.abs(np.divide(ell1.axis/ell2.axis))
     for i in range(1,3):
-        dRatio[i-1]=(ell1.axis[i]/ell1.axis[0])/(ell2.axis[i]/ell2.axis[0])
+        dRatio[i-1]=np.abs((ell1.axis[i]/ell1.axis[0])/(ell2.axis[i]/ell2.axis[0]))
     #dori=np.abs(np.divide(ell1.orientations/ell2.orientations))
-    d=np.sum(np.abs(dRatio[dRatio<1+error & dRatio>1-error]))
+    d=np.sum(dRatio[dRatio<1+error & dRatio>1-error])
     if(d==0):
         for i in range(0,3):
             for j in range(0,3):
                 inP[i]+=ell1.orientations[j,i]*ell2.orientations[j,i]
+            if(inP[i]<((ell1.axis(i))**2.+error) and inP[i]>((ell1.axis(i))**2.-error):
+                c+=1
+        if(c==3):
+            AreSame=True
     #sum[j]=ell1.orientations[:,i]*ell2.orientations[:,i]
     #uax=np.ones(3)
     #uori=np.ones(3,3)
     #dax2=dax[dax<1.0001 & dax>0.9999]
     #dori2=np.abs(inP[i]-ell1.axis[i])#dori[dori<1.0001 & dori>0.9999]
-
-    if(np.sum(dax2) ==0 and np.sum(dori2)==0):
-        AreSame=True
+    #if(np.sum(dax2) ==0 and np.sum(dori2)==0):
+    #    AreSame=True
     return AreSame;
 def _GetShape(halo,ds,Rvir):
     ad = ds.all_data()
