@@ -1,1 +1,5 @@
 snap*
+*.bin
+halo_catalogs
+splash.defaults
+*.ascii
