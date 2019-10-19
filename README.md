@@ -10,3 +10,6 @@ https://ui.adsabs.harvard.edu/abs/1991ApJ...368..325K/abstract <br>
 http://adsabs.harvard.edu/abs/1991ApJ...378..496D <br>
 http://adsabs.harvard.edu/abs/1992ApJ...399..405W <br>
 https://academic.oup.com/mnras/article/367/4/1781/1747695
+
+Applications: <br>
+https://arxiv.org/abs/1910.04045
