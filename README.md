@@ -1,4 +1,4 @@
-# HaloShape - The inner structure of dark matter halo 
+# HaloShape - The inner structure of dark matter halo (in progress)
 Extracts inner structure of the halo using eigenvalues and eigenvectors of the shape tensor.
 This work is mainly following M. Zemp's approach but there are fundamental differences in details.
 https://arxiv.org/abs/1107.5582
