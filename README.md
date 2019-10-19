@@ -8,4 +8,5 @@ earlier version is based on HOP halo finder but based on some errors in the posi
 Earlier works:
 https://ui.adsabs.harvard.edu/abs/1991ApJ...368..325K/abstract <br>
 http://adsabs.harvard.edu/abs/1991ApJ...378..496D <br>
-http://adsabs.harvard.edu/abs/1992ApJ...399..405W
+http://adsabs.harvard.edu/abs/1992ApJ...399..405W <br>
+https://academic.oup.com/mnras/article/367/4/1781/1747695
