@@ -261,6 +261,7 @@ def GetShape(h,ds):
     c=[0]*len(Rbins)
     b_a=[0]*len(Rbins)
     c_a=[0]*len(Rbins)
+    v0=1#ell.volume
     for i in range(0,len(Rbins)-1):
         iteration=0
         convergence=False
@@ -280,7 +281,7 @@ def GetShape(h,ds):
             #orientationNew=np.array([0,0,0],[0,0,0],[0,0,0])#orientationNew # 0 just for test
             #if() what if there was ne eignevalue?
             newell=ellipsoid(axisNew,orientationNew)
-            if i>0:
+            if iteration>0:
                 comp=CompareEllipsoids(ell,newell)
                 if comp==True:
                     conv+=1
@@ -291,8 +292,11 @@ def GetShape(h,ds):
                 #if conv>=2:
                 #    convergence=True#CompareEllipsoids(ell,newell)
                 if(not convergence):
-                    #iteration+=1
-                    axis=axisNew
+                    #iteration+=1  #  new_list = [x+1 for x in my_list]
+                    norm=(v0/(np.prod(axisNew)))**(1./3.)
+                    axis=[ax*norm for ax in axisNew]
+                    print("normalized axis:")
+                    print(axis)
                     orientation=orientationNew
                 if(iteration>=iteLim):
                     print("S didn't converge for halo %d"%hid)
@@ -300,7 +304,8 @@ def GetShape(h,ds):
             else:
                 axis=axisNew
                 orientation=orientationNew
-                v0=ell.volume
+                if (i==0):
+                    v0=ell.volume
             iteration+=1
         a[i]=axis[0]
         b[i]=axis[1]
