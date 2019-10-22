@@ -19,6 +19,8 @@ import sys
 
 from scipy.spatial.transform import Rotation as R
 from numpy import linalg as LA
+from operator import mul
+from functools import reduce
 
 
 #define an ellipsoid object in an arbitrary orientation (a,b,c,Alpha,Beta,Yamma)
@@ -271,6 +273,8 @@ def GetShape(h,ds):
             print("halo %d -bin %d -iteration %d"% (hid,i+1, iteration+1))
             ell=ellipsoid(axis,orientation)
             s=ell.ShapeTesnsor(coords,Pmass[0],Rbins[i],Rbins[i+1])
+            if (i==0):
+                v0=ell.volume()
             print("shape tensor:")
             print(np.array(s))
             axisNew,orientationNew=LA.eig(s)
@@ -293,7 +297,8 @@ def GetShape(h,ds):
                 #    convergence=True#CompareEllipsoids(ell,newell)
                 if(not convergence):
                     #iteration+=1  #  new_list = [x+1 for x in my_list]
-                    norm=(v0/(np.prod(axisNew)))**(1./3.)
+                    vol=reduce(mul,axisNew)
+                    norm=(v0/vol)**(1./3.)
                     axis=[ax*norm for ax in axisNew]
                     print("normalized axis:")
                     print(axis)
@@ -302,10 +307,13 @@ def GetShape(h,ds):
                     print("S didn't converge for halo %d"%hid)
                     convergence=True
             else:
-                axis=axisNew
+                vol=reduce(mul,axisNew)
+                print(vol)
+                norm=(v0/vol)**(1./3.)
+                axis=[ax*norm for ax in axisNew]
                 orientation=orientationNew
-                if (i==0):
-                    v0=ell.volume
+                #if (i==0):
+                #    v0=ell.volume()
             iteration+=1
         a[i]=axis[0]
         b[i]=axis[1]
