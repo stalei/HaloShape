@@ -109,6 +109,13 @@ class halo:
         self.M=M
         self.pnum=pnum
         self.id=id
+class shape:
+    def __init__(self,R,M,a,b,c):
+        self.R=R
+        self.M=M
+        self.b_a=b/a
+        self.c_a=c/a
+        self.T=(a**2.-b**2.)/(a**2.+b**2.)
 class ellipsoid:
     def __init__(self,axis,orientations):#put in tuple (self,p,angle)..p.x.
         self.a=axis[0]
@@ -315,11 +322,12 @@ def GetShape(h,ds):
                 #if (i==0):
                 #    v0=ell.volume()
             iteration+=1
-        a[i]=axis[0]
+        a[i]=axis[0] # use max instead
         b[i]=axis[1]
-        c[i]=axis[2]
+        c[i]=axis[2] # use min instead
         b_a[i]=b[i]/a[i]
         c_a[i]=c[i]/a[i]
+        #use the shape object instead
     #now to save these numbers somewhere
     # save halo id, center, bins, and shapes,
 
@@ -328,14 +336,15 @@ def GetShape(h,ds):
 
 
 
-#how to run: python ShapeAnalysis.py snapshot_file halo_catalog check_contamination
-#example: $python ShapeAnalysis.py snap_264 halos_0.0.bin 1
+#how to run: python ShapeAnalysis.py snapshot_file halo_catalog check_contamination extract_shape
+#example: $python ShapeAnalysis.py snap_264 halos_0.0.bin 1 1
 
 if __name__ == "__main__":
 	parser = argparse.ArgumentParser()
 	parser.add_argument("snap", type=str)
 	parser.add_argument("halo",type=str)
 	parser.add_argument("contamination", type=int)
+	parser.add_argument("extractshape", type=int)
 	args = parser.parse_args()
 	ds = yt.load(args.snap)#, unit_base=unit_base1)#,unit_system='galactic')
 	if ds is None:
@@ -394,6 +403,7 @@ if __name__ == "__main__":
 	center[0]=hx
 	center[1]=hy
 	center[2]=hz
+	print("# halos valid for the shape anlysis:%d"%len(hM))
 	h=halo(center,hR,hM,hP,hid) # be careful later if you have more than one halo
 	# check for contamination
 	if(args.contamination == 1):
@@ -404,9 +414,9 @@ if __name__ == "__main__":
 		#hc.add_callback("IsContaminated", ds, Rvir)
 	#hc.create(save_halos=True)
 	#
-	#
-	print("Let's extract the shape!")
-	GetShape(h,ds)
+	if(args.extractshape == 1):
+		print("Let's extract the shape!")
+		GetShape(h,ds)
 	#add_callback("GetShape", _GetShape)
 	#hc.add_callback("GetShape",ds,Rvir)
 	#hc.create(save_halos=True)
