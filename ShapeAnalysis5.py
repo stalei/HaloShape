@@ -359,7 +359,7 @@ if __name__ == "__main__":
 	print("Mass unit: ", ds.mass_unit.in_units('Msun'))
 	print("Velocity unit: ", ds.velocity_unit.in_units('km/s'))
 	#dh=yt.load(args.halo)
-	dh=np.genfromtxt('halos_0.0.ascii', skip_header=18)
+	dh=np.genfromtxt(args.halo, skip_header=18)
 	if dh is None:
 		print ("Error, sorry, I couldn't read the halo binary file.!")
 		sys.exit(1)
@@ -378,7 +378,7 @@ if __name__ == "__main__":
 	#print("Mvir=%g-Rvir:%g"%(masses,Rvir))
 	Idh=np.array(dh[:,0])
 	#CountAll= len(id)
-	p=1000
+	p=5000
 	pnumh=np.array(dh[:,1])
 	Mvirh=np.array(dh[:,2])
 	Rvirh=np.array(dh[:,4])# in kpc
@@ -388,11 +388,11 @@ if __name__ == "__main__":
 	#Posh=(xhalo,yhalo,zhalo)
 	#print(Posh)
 
-	print("Mvir-Rvir:")
-	print(Mvirh)
-	print(Rvirh)
-	print(xhalo)
-	print(pnumh)
+	#print("Mvir-Rvir:")
+	#print(Mvirh)
+	#print(Rvirh)
+	#print(xhalo)
+	#print(pnumh)
 	hid=Idh[pnumh>p]
 	hM=Mvirh[pnumh>p]
 	hx=xhalo[pnumh>p]
@@ -402,13 +402,18 @@ if __name__ == "__main__":
 	hR/=1000 # convert to Mpc
 	#print(hR)
 	hP=pnumh[pnumh>p]
+	print("Mvir-Rvir-#p:")
+	print(hM)
 	print(hR)
+	print(hP)
 	center=np.zeros(3)
 	center[0]=hx
 	center[1]=hy
 	center[2]=hz
-	print("# halos valid for the shape anlysis:%d"%len(hM))
+	#print("# halos valid for the shape anlysis:%d"%len(hM))
 	h=halo(center,hR,hM,hP,hid) # be careful later if you have more than one halo
+	print("we selected this halo (center,Rvir,Mvir,#p,id)")
+	print(h.pos,h.R,h.M,h.pnum,h.id)
 	# check for contamination
 	if(args.contamination == 1):
 		print("checking for contamination")
