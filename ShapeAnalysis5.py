@@ -110,7 +110,8 @@ class halo:
         self.pnum=pnum
         self.id=id
 class shape:
-    def __init__(self,R,M,a,b,c):
+    def __init__(self,hid,R,M,a,b,c):
+        self.hid=hid
         self.R=R
         self.M=M
         self.b_a=b/a
@@ -212,6 +213,7 @@ def CompareEllipsoids(ell1,ell2):
             AreSame=True
     return AreSame;
 def GetShape(h,ds):
+    FullShape=[]
     ad = ds.all_data()
     coordinatesDM = ad[("Halo","Coordinates")]
     #dds = halo.halo_catalog.data_ds
@@ -322,11 +324,13 @@ def GetShape(h,ds):
                 #if (i==0):
                 #    v0=ell.volume()
             iteration+=1
-        a[i]=axis[0] # use max instead
-        b[i]=axis[1]
-        c[i]=axis[2] # use min instead
-        b_a[i]=b[i]/a[i]
-        c_a[i]=c[i]/a[i]
+        axis.sort()
+        FullShape.append(shape(h.hid,h.R,h.M,axis[0],axis[1],axis[2]))
+        #a[i]=axis[0] # use max instead
+        #b[i]=axis[1]
+        #c[i]=axis[2] # use min instead
+        #b_a[i]=b[i]/a[i]
+        #c_a[i]=c[i]/a[i]
         #use the shape object instead
     #now to save these numbers somewhere
     # save halo id, center, bins, and shapes,
