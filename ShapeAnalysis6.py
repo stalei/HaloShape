@@ -110,10 +110,11 @@ class halo:
         self.pnum=pnum
         self.id=id
 class shape:
-    def __init__(self,hid,R,M,a,b,c):
+    def __init__(self,hid,Rv,Mv,R,a,b,c):
         self.hid=hid
+        self.Rv=Rv
+        self.Mv=Mv
         self.R=R
-        self.M=M
         self.b_a=b/a
         self.c_a=c/a
         self.T=(a**2.-b**2.)/(a**2.+b**2.)
@@ -282,7 +283,7 @@ def GetShape(h,ds):
             print("halo %d -bin %d -iteration %d"% (hid,i+1, iteration+1))
             ell=ellipsoid(axis,orientation)
             s=ell.ShapeTesnsor(coords,Pmass[0],Rbins[i],Rbins[i+1])
-            if (i==0):
+            if (iteration==0):
                 v0=ell.volume()
             print("shape tensor:")
             print(np.array(s))
@@ -325,7 +326,8 @@ def GetShape(h,ds):
                 #    v0=ell.volume()
             iteration+=1
         axis.sort()
-        FullShape.append(shape(h.id,h.R,h.M,axis[0],axis[1],axis[2]))
+        Rave=(Rbins[i]+Rbins[i+1])/2.
+        FullShape.append(shape(h.id,h.R,h.M,Rave,axis[0],axis[1],axis[2]))
         #a[i]=axis[0] # use max instead
         #b[i]=axis[1]
         #c[i]=axis[2] # use min instead
