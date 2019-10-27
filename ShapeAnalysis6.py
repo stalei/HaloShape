@@ -28,6 +28,7 @@ from scipy.spatial.transform import Rotation as R
 from numpy import linalg as LA
 from operator import mul
 from functools import reduce
+import matplotlib.pyplot as plt
 
 
 #define an ellipsoid object in an arbitrary orientation (a,b,c,Alpha,Beta,Yamma)
@@ -117,14 +118,18 @@ class halo:
         self.pnum=pnum
         self.id=id
 class shape:
-    def __init__(self,hid,Rv,Mv,R,a,b,c):
+    def __init__(self,hid,Rv,Mv,R,ax):
+        ax.sort()
         self.hid=hid
         self.Rv=Rv
         self.Mv=Mv
         self.R=R
-        self.b_a=b/a
-        self.c_a=c/a
-        self.T=(a**2.-b**2.)/(a**2.+b**2.)
+        self.a=ax[2]
+        self.b=ax[1]
+        self.c=ax[0]
+        self.b_a=ax[1]/ax[2]
+        self.c_a=ax[0]/ax[2]
+        self.T=(ax[2]**2.-ax[1]**2.)/(ax[2]**2.-ax[0]**2.)
 class ellipsoid:
     def __init__(self,axis,orientations):#put in tuple (self,p,angle)..p.x.
         self.a=axis[0]
@@ -334,7 +339,7 @@ def GetShape(h,ds):
             iteration+=1
         axis.sort()
         Rave=(Rbins[i]+Rbins[i+1])/2.
-        FullShape.append(shape(h.id,h.R,h.M,Rave,axis[0],axis[1],axis[2]))
+        FullShape.append(shape(h.id,h.R,h.M,Rave,axis))
         #a[i]=axis[0] # use max instead
         #b[i]=axis[1]
         #c[i]=axis[2] # use min instead
@@ -343,6 +348,7 @@ def GetShape(h,ds):
         #use the shape object instead
     #now to save these numbers somewhere
     # save halo id, center, bins, and shapes,
+    print(FullShape[0].R)
     return FullShape
 
     #and let's plot these
@@ -389,8 +395,8 @@ if __name__ == "__main__":
 	Idh=np.array(dh[:,0])
 	#CountAll= len(id)
 	p=5000
-	UpperMass=1.0e13
-	LowerMass=1.5e11
+	UpperMass=1.8e12
+	LowerMass=7.0e11
 	pnumh=np.array(dh[:,1])
 	Mvirh=np.array(dh[:,2])
 	Rvirh=np.array(dh[:,4])# in kpc
@@ -446,16 +452,55 @@ if __name__ == "__main__":
 		#hc.add_callback("IsContaminated", ds, Rvir)
 	#hc.create(save_halos=True)
 	#
+	fig = plt.figure(1)
+	fig.suptitle('Shapes')
+	ax1 = fig.add_subplot(221)
+	ax2 = fig.add_subplot(222)
+	ax3 = fig.add_subplot(223)
+	ax4 = fig.add_subplot(224)
+	ax1.legend(loc=2)
 	FinalHaloShape=[]
 	if(args.extractshape == 1):
 		print("Let's extract the shape!")
 		for EachHalo in h:
-			FinalHaloShape.append(GetShape(EachHalo,ds))
+			HShape=GetShape(EachHalo,ds)
+			#FinalHaloShape.append(GetShape(EachHalo,ds))
+			#for sbin in HShape:
+			ba=np.array(HShape[0].b_a)
+			print(ba)
+			pR=[]
+			pb_a=[]
+			pid=[]
+			pc_a=[]
+			pT=[]
+			for s in HShape:
+				#ax1.plot(s.R,s.b_a) or ax1.scatter(s.R,s.b_a,c='black', alpha=0.9, marker='.',s=15)
+				#ax1.scatter( (s.R)*1000,s.b_a, alpha=0.9, marker='.',s=15)
+				pR.append(s.R*1000)
+				pb_a.append(s.b_a)
+				pc_a.append(s.c_a)
+				pid.append(s.hid)
+				pT.append(s.T)
+			ax1.title.set_text('b/a')
+			ax2.title.set_text('c/a')
+			ax3.title.set_text('T')
+			#ax2.plot(pR,pb_a,pR,pb_a,'o',label=str(pid))
+			ax1.plot(pR,pb_a,label=str(pid[0]))
+			ax2.plot(pR,pc_a,label=str(pid[0]))
+			ax3.plot(pR,pT,label=str(pid[0]))
+		#print(FinalHaloShape[:])
+		#ax1.plot(FinalHaloShape.b_a,FinalHaloShape.R)
+
 	#add_callback("GetShape", _GetShape)
 	#hc.add_callback("GetShape",ds,Rvir)
 	#hc.create(save_halos=True)
-        #ad = ds.all_data()
-    	#coordinatesDM = ad[("Halo","Coordinates")]
+		#ad = ds.all_data()
+		#coordinatesDM = ad[("Halo","Coordinates")]
 	#ellipsoid=a,b,c and rotation
 	#add_callback(get_shape(coords,elipsoid,Rin,Rout))
 	#ellipsoid=a,b,c and rotation
+	# now let's plot the results
+	ax1.legend(loc=2)
+	ax2.legend(loc=2)
+	ax3.legend(loc=3)
+	plt.show()
