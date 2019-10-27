@@ -1,4 +1,11 @@
-#  © Shahram Talei @ 2019 The University of Alabama
+#  © Shahram Talei @ 2019 The University of Alabama - All rights reserved.
+#you can redistribute it and/or modify
+#it under the terms of the GNU General Public License as published by
+#the Free Software Foundation; either version 3 of the License, or
+#(at your option) any later version.
+#You should have received a copy of the GNU General Public License
+#along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
 from __future__ import division
 import yt
 import numpy as np
@@ -382,8 +389,8 @@ if __name__ == "__main__":
 	Idh=np.array(dh[:,0])
 	#CountAll= len(id)
 	p=5000
-	UpperMass=1.9e12
-	LowerMass=1.0e12
+	UpperMass=1.0e13
+	LowerMass=1.5e11
 	pnumh=np.array(dh[:,1])
 	Mvirh=np.array(dh[:,2])
 	Rvirh=np.array(dh[:,4])# in kpc
@@ -426,7 +433,7 @@ if __name__ == "__main__":
 		center[1]=hy2[i]
 		center[2]=hz2[i]
 		#print("# halos valid for the shape anlysis:%d"%len(hM))
-		h.append(halo(center,hR2[i],hM2[i],hP2[i],hid2[i])) # be careful later if you have more than one halo
+		h.append(halo(center,hR2[i],hM2[i],hP2[i],hid2[i]))
 	#print("we selected this halo (center,Rvir,Mvir,#p,id)")
 	#print(h.pos,h.R,h.M,h.pnum,h.id)
 	# check for contamination
