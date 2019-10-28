@@ -191,7 +191,7 @@ class ellipsoid:
                 for point in coords:
                     #print("point before if:")
                     #print(point)
-                    if(self.IsInside(point,Rout)):# and not(self.IsInside(point,Rin))):
+                    if(self.IsInside(point,Rout)):# and (not(self.IsInside(point,Rin)))):
                         #print("point after if:")
                         #print(point)
                         #print("point:%g"%(m*point[i]*point[j]))
@@ -271,8 +271,8 @@ def GetShape(h,ds):
     # REMOVE
     #Rvir=10
 	# Rem
-    bins=2.
-    iteLim=3
+    bins=4.
+    iteLim=10
     #convLim=5 nor need, we just compare two
     #Rbins=np.logspace(0,Rvir,bins)#(Rvir/bins,Rvir,bins)
     Rbins=np.linspace(0,Rvir,bins+1)
@@ -484,10 +484,12 @@ if __name__ == "__main__":
 			ax1.title.set_text('b/a')
 			ax2.title.set_text('c/a')
 			ax3.title.set_text('T')
+			ax4.title.set_text('c/a - b/a')
 			#ax2.plot(pR,pb_a,pR,pb_a,'o',label=str(pid))
 			ax1.plot(pR,pb_a,label=str(pid[0]))
 			ax2.plot(pR,pc_a,label=str(pid[0]))
 			ax3.plot(pR,pT,label=str(pid[0]))
+			ax4.plot(pc_a,pb_a,label=str(pid[0]))
 		#print(FinalHaloShape[:])
 		#ax1.plot(FinalHaloShape.b_a,FinalHaloShape.R)
 
@@ -503,4 +505,5 @@ if __name__ == "__main__":
 	ax1.legend(loc=2)
 	ax2.legend(loc=2)
 	ax3.legend(loc=3)
+	ax4.legend(loc=4)
 	plt.show()
