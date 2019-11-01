@@ -29,7 +29,7 @@ from numpy import linalg as LA
 from operator import mul
 from functools import reduce
 import matplotlib.pyplot as plt
-
+from yt.units import parsec, Msun, Mpc
 
 #define an ellipsoid object in an arbitrary orientation (a,b,c,Alpha,Beta,Yamma)
 
@@ -58,7 +58,8 @@ def IsContaminated(h,ds):#snap):
 	#ds = yt.load(args.snap)#,index_ptype="Halo")
 	#dsBND = yt.load(args.snap,index_ptype="Bndry")
 	ad = ds.all_data()
-	coordinatesDM = ad[("Halo","Coordinates")]
+	#print(ad[("halo","ParPosX")])
+	coordinatesDM = ad[("all","particle_position_x")]
 	#massesDM=ad[("Halo","Masses")]
 	coordinatesLowRes = ad[("Bndry","Coordinates")]
 	DMCount=len(coordinatesDM)
@@ -228,7 +229,10 @@ def CompareEllipsoids(ell1,ell2):
 def GetShape(h,ds):
     FullShape=[]
     ad = ds.all_data()
-    coordinatesDM = ad[("Halo","Coordinates")]
+    xp=ad[("all","particle_position_x")]
+    yp=ad[("all","particle_position_y")]
+    zp=ad[("all","particle_position_z")]
+    coordinatesDM =np.array([xp,yp,zp])# ad[("Halo","Coordinates")]
     #dds = halo.halo_catalog.data_ds
     #center = dds.arr([halo.quantities["particle_position_%s" % axis] \
     #for axis in "xyz"])
@@ -239,7 +243,7 @@ def GetShape(h,ds):
     Rvir=h.R
     print("halo center (Mpc):")
     print(center)
-    coordsDM=np.array(coordinatesDM.v)
+    coordsDM=np.array(coordinatesDM)
     for i in range(0,3):
         print(coordsDM[:,i])
         print(center[i])
@@ -260,10 +264,10 @@ def GetShape(h,ds):
     #coords[:,1]-=center[1]
     #coords[:,2]-=center[2]
     #print(coords[0,:])
-    Pmass=ad[("Halo","Mass")].in_units('Msun')
+    Pmass=ad[("all","particle_mass")].in_units('Msun')
     print("Individual particle mass: %g"%Pmass[0])
-    IDsDM = ad[("Halo","ParticleIDs")]
-    print(len(IDsDM))
+    #IDsDM = ad[("Halo","ParticleIDs")]
+    #print(len(IDsDM))
     hid =h.id# halo.quantities['particle_identifier']
     #halos = HaloFinder(ds, ptype=Halo, dm_only=False, total_mass=None)
     #ind = halos[0]["particle_index"] # list of particles IDs in this halo
@@ -357,101 +361,28 @@ def GetShape(h,ds):
 
 
 #how to run: python ShapeAnalysis.py snapshot_file halo_catalog check_contamination extract_shape
-#example: $python ShapeAnalysis.py snap_264 halos_0.0.bin 1 1
+#example: $python ShapeAnalysisTest.py snap_264 halos_0.0.bin 1 1
 
 if __name__ == "__main__":
-	parser = argparse.ArgumentParser()
-	parser.add_argument("snap", type=str)
-	parser.add_argument("halo",type=str)
-	parser.add_argument("contamination", type=int)
-	parser.add_argument("extractshape", type=int)
-	args = parser.parse_args()
-	ds = yt.load(args.snap)#, unit_base=unit_base1)#,unit_system='galactic')
-	if ds is None:
-		print ("Error, sorry, I couldn't read the snapshot.!")
-		sys.exit(1)
-	print("Length unit: ", ds.length_unit.in_units('Mpc'))
-	print("Time unit: ", ds.time_unit.in_units('Gyr'))
-	print("Mass unit: ", ds.mass_unit.in_units('Msun'))
-	print("Velocity unit: ", ds.velocity_unit.in_units('km/s'))
-	#dh=yt.load(args.halo)
-	dh=np.genfromtxt(args.halo, skip_header=18)
-	if dh is None:
-		print ("Error, sorry, I couldn't read the halo binary file.!")
-		sys.exit(1)
-	#halos = dh.all_data()
-	#hc = HaloCatalog(data_ds=ds, finder_method='hop', finder_kwargs={ "dm_only": False , "ptype":"Halo"} )
-	#hc = HaloCatalog(data_ds=ds, halos_ds=dh)#, finder_method='rockstar')#, finder_kwargs={ "dm_only": False })#, "dm_type":1} )
-	#hc.add_callback("virial_quantities", ["radius"], profile_storage = "virial_quantities_profiles")
-	#hc.add_recipe("calculate_virial_quantities", ["radius"])
-	#hc.create(save_halos=True)
-	#ad0 = hc.halos_ds.all_data()
-	#masses = ad0['particle_mass'][:]#.in_units('Msun')
-	#Rvir = ad0['virial_radius'][:]
-	#Rvir=Rvir.in_units('Mpc')#*=3.24078e-25#=0.2
-	#R2=halos["halos", "virial_radius"]
-	#Rvir=0.25#175
-	#print("Mvir=%g-Rvir:%g"%(masses,Rvir))
-	Idh=np.array(dh[:,0])
-	#CountAll= len(id)
 	p=1000
 	UpperMass=1.0e13
 	LowerMass=7.0e11
-	pnumh=np.array(dh[:,1])
-	Mvirh=np.array(dh[:,2])
-	Rvirh=np.array(dh[:,4])# in kpc
-	xhalo=np.array(dh[:,8])
-	yhalo=np.array(dh[:,9])
-	zhalo=np.array(dh[:,10])
-	#Posh=(xhalo,yhalo,zhalo)
-	#print(Posh)
 
-	#print("Mvir-Rvir:")
-	#print(Mvirh)
-	#print(Rvirh)
-	#print(xhalo)
-	#print(pnumh)
-	hP=pnumh[pnumh>p]
-	hid=Idh[pnumh>p]
-	hM=Mvirh[pnumh>p]
-	hx=xhalo[pnumh>p]
-	hy=yhalo[pnumh>p]
-	hz=zhalo[pnumh>p]
-	hR=Rvirh[pnumh>p]
-	hP2=hP[(hM>LowerMass) & (hM<UpperMass)]
-	hid2=hid[(hM>LowerMass) & (hM<UpperMass)]
-	hM2=hM[(hM>LowerMass) & (hM<UpperMass)]
-	hx2=hx[(hM>LowerMass) & (hM<UpperMass)]
-	hy2=hy[(hM>LowerMass) & (hM<UpperMass)]
-	hz2=hz[(hM>LowerMass) & (hM<UpperMass)]
-	hR2=hR[(hM>LowerMass) & (hM<UpperMass)]
-	hR2/=1000 # convert to Mpc
-	#print(hR)
-	#hP=pnumh[pnumh>p]
-	print("Mvir-Rvir-#p:")
-	print(hM2)
-	print(hR2)
-	print(hP2)
 	center=np.zeros(3)
-	h=[]
-	for i in range(len(hP2)):
-		center[0]=hx2[i]
-		center[1]=hy2[i]
-		center[2]=hz2[i]
-		#print("# halos valid for the shape anlysis:%d"%len(hM))
-		h.append(halo(center,hR2[i],hM2[i],hP2[i],hid2[i]))
-	#print("we selected this halo (center,Rvir,Mvir,#p,id)")
-	#print(h.pos,h.R,h.M,h.pnum,h.id)
-	# check for contamination
-	if(args.contamination == 1):
-		print("checking for contamination")
-		for EachHalo in h:
-			if(not(IsContaminated(EachHalo,ds))):
-				print("halo %d is not contaminated"%EachHalo.id)
-		#add_callback("IsContaminated", _IsContaminated)
-		#hc.add_callback("IsContaminated", ds, Rvir)
-	#hc.create(save_halos=True)
-	#
+	center[0]=0
+	center[1]=0
+	center[2]=0
+	h=halo(center,8.0e12,1.2e12,700000,0)
+	n_particles = 5000000
+	ppx, ppy, ppz = 1e6*np.random.normal(size=[3, n_particles])
+	ppm = np.ones(n_particles)
+	data = {'particle_position_x': ppx,'particle_position_y': ppy,'particle_position_z': ppz,'particle_mass': ppm}
+	bbox = 1.1*np.array([[min(ppx), max(ppx)], [min(ppy), max(ppy)], [min(ppz), max(ppz)]])
+	#ds = yt.load_particles(data, length_unit=parsec, mass_unit=1e8*Msun, n_ref=256, bbox=bbox)
+	ds = yt.load_particles(data, length_unit=Mpc, mass_unit=Msun, n_ref=256, bbox=bbox)
+	print(ds.field_list)
+	print(ppx)
+
 	fig = plt.figure(1)
 	fig.suptitle('Shapes')
 	ax1 = fig.add_subplot(221)
@@ -460,48 +391,32 @@ if __name__ == "__main__":
 	ax4 = fig.add_subplot(224)
 	ax1.legend(loc=2)
 	FinalHaloShape=[]
-	if(args.extractshape == 1):
-		print("Let's extract the shape!")
-		for EachHalo in h:
-			HShape=GetShape(EachHalo,ds)
-			#FinalHaloShape.append(GetShape(EachHalo,ds))
-			#for sbin in HShape:
-			ba=np.array(HShape[0].b_a)
-			print(ba)
-			pR=[]
-			pb_a=[]
-			pid=[]
-			pc_a=[]
-			pT=[]
-			for s in HShape:
-				#ax1.plot(s.R,s.b_a) or ax1.scatter(s.R,s.b_a,c='black', alpha=0.9, marker='.',s=15)
-				#ax1.scatter( (s.R)*1000,s.b_a, alpha=0.9, marker='.',s=15)
-				pR.append(s.R*1000)
-				pb_a.append(s.b_a)
-				pc_a.append(s.c_a)
-				pid.append(s.hid)
-				pT.append(s.T)
-			ax1.title.set_text('b/a')
-			ax2.title.set_text('c/a')
-			ax3.title.set_text('T')
-			ax4.title.set_text('c/a - b/a')
-			#ax2.plot(pR,pb_a,pR,pb_a,'o',label=str(pid))
-			ax1.plot(pR,pb_a,label=str(pid[0]))
-			ax2.plot(pR,pc_a,label=str(pid[0]))
-			ax3.plot(pR,pT,label=str(pid[0]))
-			ax4.plot(pc_a,pb_a,'o',label=str(pid[0]))
-		#print(FinalHaloShape[:])
-		#ax1.plot(FinalHaloShape.b_a,FinalHaloShape.R)
-
-	#add_callback("GetShape", _GetShape)
-	#hc.add_callback("GetShape",ds,Rvir)
-	#hc.create(save_halos=True)
-		#ad = ds.all_data()
-		#coordinatesDM = ad[("Halo","Coordinates")]
-	#ellipsoid=a,b,c and rotation
-	#add_callback(get_shape(coords,elipsoid,Rin,Rout))
-	#ellipsoid=a,b,c and rotation
-	# now let's plot the results
+	print("Let's extract the shape!")
+	HShape=GetShape(h,ds)
+	ba=np.array(HShape[0].b_a)
+	print(ba)
+	pR=[]
+	pb_a=[]
+	pid=[]
+	pc_a=[]
+	pT=[]
+	for s in HShape:
+		#ax1.plot(s.R,s.b_a) or ax1.scatter(s.R,s.b_a,c='black', alpha=0.9, marker='.',s=15)
+		#ax1.scatter( (s.R)*1000,s.b_a, alpha=0.9, marker='.',s=15)
+		pR.append(s.R*1000)
+		pb_a.append(s.b_a)
+		pc_a.append(s.c_a)
+		pid.append(s.hid)
+		pT.append(s.T)
+	ax1.title.set_text('b/a')
+	ax2.title.set_text('c/a')
+	ax3.title.set_text('T')
+	ax4.title.set_text('c/a - b/a')
+	#ax2.plot(pR,pb_a,pR,pb_a,'o',label=str(pid))
+	ax1.plot(pR,pb_a,label=str(pid[0]))
+	ax2.plot(pR,pc_a,label=str(pid[0]))
+	ax3.plot(pR,pT,label=str(pid[0]))
+	ax4.plot(pc_a,pb_a,'o',label=str(pid[0]))
 	ax1.legend(loc=3)
 	ax2.legend(loc=3)
 	ax3.legend(loc=3)
