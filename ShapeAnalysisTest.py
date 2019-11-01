@@ -232,7 +232,9 @@ def GetShape(h,ds):
     xp=ad[("all","particle_position_x")]
     yp=ad[("all","particle_position_y")]
     zp=ad[("all","particle_position_z")]
-    coordinatesDM =np.array([xp,yp,zp])# ad[("Halo","Coordinates")]
+    coordsArray=np.array((xp,yp,zp))
+    coordinatesDM =coordsArray.T# we need to reshape
+    #print(coordinatesDM)
     #dds = halo.halo_catalog.data_ds
     #center = dds.arr([halo.quantities["particle_position_%s" % axis] \
     #for axis in "xyz"])
@@ -275,8 +277,8 @@ def GetShape(h,ds):
     # REMOVE
     #Rvir=10
 	# Rem
-    bins=3
-    iteLim=2
+    bins=8
+    iteLim=4
     #convLim=5 nor need, we just compare two
     #Rbins=np.logspace(0,Rvir,bins)#(Rvir/bins,Rvir,bins)
     Rbins=np.linspace(0,Rvir,bins+1)
@@ -372,23 +374,27 @@ if __name__ == "__main__":
 	center[0]=0
 	center[1]=0
 	center[2]=0
-	h=halo(center,8.0e12,1.2e12,700000,0)
-	n_particles = 5000000
-	ppx, ppy, ppz = 1e6*np.random.normal(size=[3, n_particles])
+	n_particles = 30000
+	h=halo(center,5.0e2,1.2e12,n_particles,0)
+	ppx, ppy, ppz =1e2*np.random.normal(size=[3, n_particles])
+	#print(np.shape(ppx))
+	#ppx=range(0,10000,n_particles)
+	#ppy=range(0,10000,n_particles)
+	#ppz=range(0,10000,n_particles)
 	ppm = np.ones(n_particles)
 	data = {'particle_position_x': ppx,'particle_position_y': ppy,'particle_position_z': ppz,'particle_mass': ppm}
 	bbox = 1.1*np.array([[min(ppx), max(ppx)], [min(ppy), max(ppy)], [min(ppz), max(ppz)]])
 	#ds = yt.load_particles(data, length_unit=parsec, mass_unit=1e8*Msun, n_ref=256, bbox=bbox)
 	ds = yt.load_particles(data, length_unit=Mpc, mass_unit=Msun, n_ref=256, bbox=bbox)
-	print(ds.field_list)
+	#print(ds.field_list)
 	print(ppx)
 
-	fig = plt.figure(1)
-	fig.suptitle('Shapes')
-	ax1 = fig.add_subplot(221)
-	ax2 = fig.add_subplot(222)
-	ax3 = fig.add_subplot(223)
-	ax4 = fig.add_subplot(224)
+	fig2 = plt.figure(2)
+	fig2.suptitle('Shapes')
+	ax1 = fig2.add_subplot(221)
+	ax2 = fig2.add_subplot(222)
+	ax3 = fig2.add_subplot(223)
+	ax4 = fig2.add_subplot(224)
 	ax1.legend(loc=2)
 	FinalHaloShape=[]
 	print("Let's extract the shape!")
@@ -421,4 +427,7 @@ if __name__ == "__main__":
 	ax2.legend(loc=3)
 	ax3.legend(loc=3)
 	ax4.legend(loc=4)
+	fig3=plt.figure(3)
+	rp=np.sqrt(ppx**2.+ppy**2.+ppz**2.)
+	plt.hist(rp,bins=100)
 	plt.show()
