@@ -30,6 +30,7 @@ from operator import mul
 from functools import reduce
 import matplotlib.pyplot as plt
 from yt.units import parsec, Msun, Mpc
+from mpl_toolkits.mplot3d import Axes3D
 
 #define an ellipsoid object in an arbitrary orientation (a,b,c,Alpha,Beta,Yamma)
 
@@ -40,76 +41,6 @@ unit_base0 = {'UnitLength_in_cm'         : 3.08568e+24,
 unit_base1 = {'length': (1.0, 'Mpc'),
     'velocity': (1.0, 'km/s'),
     'mass': (1.0e10, 'Msun')}
-
-def IsContaminated(h,ds):#snap):
-	#halo
-	#dds = halo.halo_catalog.data_ds
-	#print(halo.quantities[""])
-	center =h.pos# dds.arr([halo.quantities["particle_position_%s" % axis] \
-	Rv=h.R
-	#print(h.R)
-	#for axis in "xyz"])
-	#my_id = halo.quantities['particle_identifier']
-	#center*=3.24078e-25
-	#print("Halo %d" % (my_id))
-	#paarticles
-	count=0
-	boundary=np.zeros((2,3))
-	#ds = yt.load(args.snap)#,index_ptype="Halo")
-	#dsBND = yt.load(args.snap,index_ptype="Bndry")
-	ad = ds.all_data()
-	#print(ad[("halo","ParPosX")])
-	coordinatesDM = ad[("all","particle_position_x")]
-	#massesDM=ad[("Halo","Masses")]
-	coordinatesLowRes = ad[("Bndry","Coordinates")]
-	DMCount=len(coordinatesDM)
-	LowResCount=len(coordinatesLowRes)
-	print("number of High resolution particles:%d"%DMCount)
-	print("number of Low resolution particles:%d"%LowResCount)
-	#print(len(coordinatesDM[:,0])), x for all particles
-	for i in range(0,3):
-		boundary[0,i]=np.min(coordinatesDM[:,i]) # (min max, x y z)
-		boundary[1,i]=np.max(coordinatesDM[:,i])
-	print("high resolution particles are in box:")
-	print(boundary)
-	#for i in range(0,LowResCount): # this for is super slow!!
-	#	x=coordinatesLowRes[i,0]
-	#	y=coordinatesLowRes[i,1]
-	#	z=coordinatesLowRes[i,2]
-	#	if(x>boundary[0,0] and x<boundary[1,0] and y>boundary[0,1] and y<boundary[1,1] and z>boundary[0,2] and z<boundary[1,2]):
-	#		print("contamination at: %f,%f,%f"%x%y%z)
-	#		count+=1
-	xLR=coordinatesLowRes[:,0]
-	yLR=coordinatesLowRes[:,1]
-	zLR=coordinatesLowRes[:,2]
-
-	xLR2=xLR[(xLR>boundary[0,0]) & (xLR<boundary[1,0])]
-	yLR2=yLR[(xLR>boundary[0,0]) & (xLR<boundary[1,0])]
-	zLR2=zLR[(xLR>boundary[0,0]) & (xLR<boundary[1,0])]
-
-	xLR3=xLR2[(yLR2>boundary[0,1]) & (yLR2<boundary[1,1])]
-	yLR3=yLR2[(yLR2>boundary[0,1]) & (yLR2<boundary[1,1])]
-	zLR3=zLR2[(yLR2>boundary[0,1]) & (yLR2<boundary[1,1])]
-
-
-	xLR4=xLR3[(zLR3>boundary[0,2]) & (zLR3<boundary[1,2])]
-	yLR4=yLR3[(zLR3>boundary[0,2]) & (zLR3<boundary[1,2])]
-	zLR4=zLR3[(zLR3>boundary[0,2]) & (zLR3<boundary[1,2])]
-
-	#print(len(xLR7))
-	#count=len(xLR7)
-	r2=((xLR4.v-center[0])**2.+(yLR4.v-center[1])**2.+(zLR4.v-center[2])**2.)
-	r=np.sqrt(r2)
-	#print("separations in contaminations:")
-	#print(r)
-	# should be Rv instead of 0.17 but I have to check their unit and convert them.
-	rContamination=r[r<(Rv)]
-	count=len(rContamination)
-	print("Halo %d at:" % (h.id))
-	print(center)
-	print("is contaminated with: %d low resolution particles at δr="%count)
-	print(rContamination)
-	return count
 
 class halo:
     def __init__(self,pos,R,M,pnum,id):
@@ -147,6 +78,8 @@ class ellipsoid:
         #print("point in is inside:")
         #print(point)
         #print(R)
+        if R==0:
+            return False
         t=0
         pNew=np.array([0.0,0.0,0.0])
         for i in range(0,3):
@@ -173,6 +106,29 @@ class ellipsoid:
     def volume(self):
         return self.axis[0]*self.axis[1]*self.axis[2]
     #    eulerrotation
+    def PlotEllipsoid(self,ax,center):
+        pNew=np.array([0.0,0.0,0.0])
+        #for i in range(0,3):
+            #for j in range(0,3):
+                #print(point[j])
+                #print(self.orientations[j,i])
+                #pNew[i]+=point[j]*self.orientations[j,i] # each eig vec is [:,i] comp
+        coefs = (np.abs(self.a),np.abs(self.b),np.abs(self.c))
+        rx, ry, rz = np.sqrt(coefs)
+        # Set of all spherical angles:
+        u = np.linspace(0, 2 * np.pi, 100)
+        v = np.linspace(0, np.pi, 100)
+        x = rx * np.outer(np.cos(u), np.sin(v))
+        y = ry * np.outer(np.sin(u), np.sin(v))
+        z = rz * np.outer(np.ones_like(u), np.cos(v))
+
+        # Plot:
+        ax.plot_surface(x, y, z,  rstride=4, cstride=4, color='b', alpha=0.3)
+
+        # Adjustment of the axes, so that they all have the same span:
+        max_radius = max(rx, ry, rz)
+        #for axis in 'xyz':
+        #    getattr(ax, 'set_{}lim'.format(axis))((-max_radius, max_radius))
     def ShapeTesnsor(self,coords,m, Rin,Rout):
         print("Started extracting the shape tensor")
         i=j=0
@@ -190,11 +146,12 @@ class ellipsoid:
                 c=s=0
                 print("s[%d,%d]"%(i,j))
                 for point in coords:
+                    #print("Before=Rin:%f, Rout:%f"%(Rin,Rout))
                     #print("point before if:")
-                    #print(point)
-                    if(self.IsInside(point,Rout)):# and (not(self.IsInside(point,Rin)))):
+                    print(point)
+                    if(self.IsInside(point,Rout) and (not(self.IsInside(point,Rin)))):
                         #print("point after if:")
-                        #print(point)
+                        print("After=Rin:%f, Rout:%f"%(Rin,Rout))
                         #print("point:%g"%(m*point[i]*point[j]))
                         s+=point[i]*point[j]
                         c+=1
@@ -266,6 +223,14 @@ def GetShape(h,ds):
     #coords[:,1]-=center[1]
     #coords[:,2]-=center[2]
     #print(coords[0,:])
+    fig = plt.figure(figsize=plt.figaspect(1))
+    ax = fig.add_subplot(111, projection='3d')
+    ax.scatter(xp,yp,zp,c='black',alpha=0.1,marker='.',s=1)
+    #plt.show()
+    #ax.quiver(X, Y, Z, U, V, W)
+    #ax.set_xlim([-1, 0.5])
+    #ax.set_ylim([-1, 1.5])
+    #ax.set_zlim([-1, 8])
     Pmass=ad[("all","particle_mass")].in_units('Msun')
     print("Individual particle mass: %g"%Pmass[0])
     #IDsDM = ad[("Halo","ParticleIDs")]
@@ -277,8 +242,8 @@ def GetShape(h,ds):
     # REMOVE
     #Rvir=10
 	# Rem
-    bins=8
-    iteLim=4
+    bins=2
+    iteLim=5
     #convLim=5 nor need, we just compare two
     #Rbins=np.logspace(0,Rvir,bins)#(Rvir/bins,Rvir,bins)
     Rbins=np.linspace(0,Rvir,bins+1)
@@ -301,6 +266,8 @@ def GetShape(h,ds):
             print("halo %d -bin %d -iteration %d"% (hid,i+1, iteration+1))
             ell=ellipsoid(axis,orientation)
             s=ell.ShapeTesnsor(coords,Pmass[0],Rbins[i],Rbins[i+1])
+            ell.PlotEllipsoid(ax,center)
+            #plt.pause(0.05)
             if (iteration==0):
                 v0=ell.volume()
             print("shape tensor:")
@@ -340,6 +307,8 @@ def GetShape(h,ds):
                 norm=(v0/vol)**(1./3.)
                 axis=[ax*norm for ax in axisNew]
                 orientation=orientationNew
+                print("normalized axis:")
+                print(axis)
                 #if (i==0):
                 #    v0=ell.volume()
             iteration+=1
@@ -366,7 +335,7 @@ def GetShape(h,ds):
 #example: $python ShapeAnalysisTest.py snap_264 halos_0.0.bin 1 1
 
 if __name__ == "__main__":
-	p=1000
+	p=4000
 	UpperMass=1.0e13
 	LowerMass=7.0e11
 
@@ -374,7 +343,7 @@ if __name__ == "__main__":
 	center[0]=0
 	center[1]=0
 	center[2]=0
-	n_particles = 30000
+	n_particles = 1000
 	h=halo(center,5.0e2,1.2e12,n_particles,0)
 	ppx, ppy, ppz =1e2*np.random.normal(size=[3, n_particles])
 	#print(np.shape(ppx))
