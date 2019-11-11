@@ -395,8 +395,8 @@ if __name__ == "__main__":
 	Idh=np.array(dh[:,0])
 	#CountAll= len(id)
 	p=1000
-	UpperMass=1.0e13
-	LowerMass=7.0e11
+	UpperMass=1.5e12
+	LowerMass=1.0e12
 	pnumh=np.array(dh[:,1])
 	Mvirh=np.array(dh[:,2])
 	Rvirh=np.array(dh[:,4])# in kpc

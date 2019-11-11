@@ -148,10 +148,12 @@ class ellipsoid:
                 for point in coords:
                     #print("Before=Rin:%f, Rout:%f"%(Rin,Rout))
                     #print("point before if:")
-                    print(point)
-                    if(self.IsInside(point,Rout) and (not(self.IsInside(point,Rin)))):
+                    #print(np.sqrt(point[0]**2.+point[0]**2.+point[0]**2.))
+                    #print(not(self.IsInside(point,Rin)))
+                    #print(self.IsInside(point,Rout))
+                    if(self.IsInside(point,Rout)):# and (not(self.IsInside(point,Rin)))):
                         #print("point after if:")
-                        print("After=Rin:%f, Rout:%f"%(Rin,Rout))
+                        #print("After=Rin:%f, Rout:%f"%(Rin,Rout))
                         #print("point:%g"%(m*point[i]*point[j]))
                         s+=point[i]*point[j]
                         c+=1
@@ -242,8 +244,8 @@ def GetShape(h,ds):
     # REMOVE
     #Rvir=10
 	# Rem
-    bins=2
-    iteLim=5
+    bins=5
+    iteLim=1
     #convLim=5 nor need, we just compare two
     #Rbins=np.logspace(0,Rvir,bins)#(Rvir/bins,Rvir,bins)
     Rbins=np.linspace(0,Rvir,bins+1)
@@ -343,7 +345,7 @@ if __name__ == "__main__":
 	center[0]=0
 	center[1]=0
 	center[2]=0
-	n_particles = 1000
+	n_particles = 20000
 	h=halo(center,5.0e2,1.2e12,n_particles,0)
 	ppx, ppy, ppz =1e2*np.random.normal(size=[3, n_particles])
 	#print(np.shape(ppx))
