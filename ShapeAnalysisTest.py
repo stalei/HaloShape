@@ -72,7 +72,7 @@ class ellipsoid:
         self.A=orientations[0]
         self.B=orientations[1]
         self.C=orientations[2]
-    def IsInside(self, point,R):# put in tuple p ... p.x
+    def IsInside(self, point,R,rescale):# put in tuple p ... p.x
         #r = R.from_euler('zyx', [self.A, self.B, self.C], degrees=True)
         #point=r.apply(point)
         #print("point in is inside:")
@@ -93,8 +93,13 @@ class ellipsoid:
         #print("point in is inside:")
         #print(pNew)
         #t=np.sum((pNew/self.axis)**2.)
+        if rescale:
+            factor=R/np.max(self.axis)
+        else:
+            factor=1
+
         for i in range(0,3):
-            t+=(pNew[i]/self.axis[i])**2.
+            t+=(pNew[i]/(factor*self.axis[i]))**2.
         #t=(x/self.a)**2.+(y/self.b)**2.+(z/self.c)**2
         #print(t)
         if t<=1:
@@ -151,7 +156,7 @@ class ellipsoid:
                     #print(np.sqrt(point[0]**2.+point[0]**2.+point[0]**2.))
                     #print(not(self.IsInside(point,Rin)))
                     #print(self.IsInside(point,Rout))
-                    if(self.IsInside(point,Rout)):# and (not(self.IsInside(point,Rin)))):
+                    if(self.IsInside(point,Rout,True) and (not(self.IsInside(point,Rin,True)))):
                         #print("point after if:")
                         #print("After=Rin:%f, Rout:%f"%(Rin,Rout))
                         #print("point:%g"%(m*point[i]*point[j]))
