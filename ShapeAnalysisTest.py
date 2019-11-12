@@ -249,8 +249,8 @@ def GetShape(h,ds):
     # REMOVE
     #Rvir=10
 	# Rem
-    bins=5
-    iteLim=1
+    bins=4
+    iteLim=2
     #convLim=5 nor need, we just compare two
     #Rbins=np.logspace(0,Rvir,bins)#(Rvir/bins,Rvir,bins)
     Rbins=np.linspace(0,Rvir,bins+1)
@@ -350,10 +350,10 @@ if __name__ == "__main__":
 	center[0]=0
 	center[1]=0
 	center[2]=0
-	n_particles = 20000
+	n_particles = 10000
 	h=halo(center,5.0e2,1.2e12,n_particles,0)
 	ppx, ppy, ppz =1e2*np.random.normal(size=[3, n_particles])
-	#print(np.shape(ppx))
+	#np.shape(ppx))
 	#ppx=range(0,10000,n_particles)
 	#ppy=range(0,10000,n_particles)
 	#ppz=range(0,10000,n_particles)

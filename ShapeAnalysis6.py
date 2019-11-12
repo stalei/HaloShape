@@ -146,6 +146,8 @@ class ellipsoid:
         #print("point in is inside:")
         #print(point)
         #print(R)
+        if R==0:
+            return False
         t=0
         pNew=np.array([0.0,0.0,0.0])
         for i in range(0,3):
@@ -159,8 +161,13 @@ class ellipsoid:
         #print("point in is inside:")
         #print(pNew)
         #t=np.sum((pNew/self.axis)**2.)
+        if rescale:
+            factor=R/np.max(self.axis)
+        else:
+            factor=1
+
         for i in range(0,3):
-            t+=(pNew[i]/self.axis[i])**2.
+            t+=(pNew[i]/(factor*self.axis[i]))**2.
         #t=(x/self.a)**2.+(y/self.b)**2.+(z/self.c)**2
         #print(t)
         if t<=1:
@@ -191,7 +198,7 @@ class ellipsoid:
                 for point in coords:
                     #print("point before if:")
                     #print(point)
-                    if(self.IsInside(point,Rout)):# and (not(self.IsInside(point,Rin)))):
+                    if(self.IsInside(point,Rout,True) and (not(self.IsInside(point,Rin,True)))):
                         #print("point after if:")
                         #print(point)
                         #print("point:%g"%(m*point[i]*point[j]))
