@@ -278,8 +278,8 @@ def GetShape(h,ds):
     # REMOVE
     #Rvir=10
 	# Rem
-    bins=4
-    iteLim=1
+    bins=5
+    iteLim=2
     #convLim=5 nor need, we just compare two
     #Rbins=np.logspace(0,Rvir,bins)#(Rvir/bins,Rvir,bins)
     Rbins=np.linspace(0,Rvir,bins+1)
@@ -402,8 +402,8 @@ if __name__ == "__main__":
 	Idh=np.array(dh[:,0])
 	#CountAll= len(id)
 	p=1000
-	UpperMass=1.2e13
-	LowerMass=1.8e11
+	UpperMass=1.6e12
+	LowerMass=1.9e11
 	pnumh=np.array(dh[:,1])
 	Mvirh=np.array(dh[:,2])
 	Rvirh=np.array(dh[:,4])# in kpc
