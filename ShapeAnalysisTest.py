@@ -385,7 +385,7 @@ if __name__ == "__main__":
 	for s in HShape:
 		#ax1.plot(s.R,s.b_a) or ax1.scatter(s.R,s.b_a,c='black', alpha=0.9, marker='.',s=15)
 		#ax1.scatter( (s.R)*1000,s.b_a, alpha=0.9, marker='.',s=15)
-		pR.append(s.R*1000)
+		pR.append(s.R)
 		pb_a.append(s.b_a)
 		pc_a.append(s.c_a)
 		pid.append(s.hid)
