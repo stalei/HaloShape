@@ -350,7 +350,7 @@ if __name__ == "__main__":
 	center[0]=0
 	center[1]=0
 	center[2]=0
-	n_particles = 10000
+	n_particles = 20000
 	h=halo(center,5.0e2,1.2e12,n_particles,0)
 	ppx, ppy, ppz =1e2*np.random.normal(size=[3, n_particles])
 	#np.shape(ppx))
@@ -403,7 +403,7 @@ if __name__ == "__main__":
 	ax2.legend(loc=3)
 	ax3.legend(loc=3)
 	ax4.legend(loc=4)
-	fig3=plt.figure(3)
+	fig3=plt.figure(4)
 	rp=np.sqrt(ppx**2.+ppy**2.+ppz**2.)
 	plt.hist(rp,bins=100)
 	plt.show()

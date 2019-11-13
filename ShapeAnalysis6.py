@@ -140,7 +140,7 @@ class ellipsoid:
         self.A=orientations[0]
         self.B=orientations[1]
         self.C=orientations[2]
-    def IsInside(self, point,R):# put in tuple p ... p.x
+    def IsInside(self, point,R,rescale):# put in tuple p ... p.x
         #r = R.from_euler('zyx', [self.A, self.B, self.C], degrees=True)
         #point=r.apply(point)
         #print("point in is inside:")
@@ -278,8 +278,8 @@ def GetShape(h,ds):
     # REMOVE
     #Rvir=10
 	# Rem
-    bins=3
-    iteLim=2
+    bins=4
+    iteLim=1
     #convLim=5 nor need, we just compare two
     #Rbins=np.logspace(0,Rvir,bins)#(Rvir/bins,Rvir,bins)
     Rbins=np.linspace(0,Rvir,bins+1)
@@ -402,8 +402,8 @@ if __name__ == "__main__":
 	Idh=np.array(dh[:,0])
 	#CountAll= len(id)
 	p=1000
-	UpperMass=1.5e12
-	LowerMass=1.0e12
+	UpperMass=1.2e13
+	LowerMass=1.8e11
 	pnumh=np.array(dh[:,1])
 	Mvirh=np.array(dh[:,2])
 	Rvirh=np.array(dh[:,4])# in kpc
