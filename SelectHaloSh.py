@@ -12,6 +12,13 @@ from matplotlib.legend_handler import HandlerLine2D
 from mpl_toolkits.mplot3d import Axes3D
 import argparse
 plt.rcParams["font.size"] =12
+
+def PlotShpere(ax,R,xc,yc,zc):
+	u, v = np.mgrid[0:2*np.pi:20j, 0:np.pi:10j]
+	x = xc+(R/1000.)*np.cos(u)*np.sin(v)
+	y = yc+(R/1000.)*np.sin(u)*np.sin(v)
+	z = zc+(R/1000.)*np.cos(v)
+	ax.plot_wireframe(x, y, z, color="gray",alpha=0.3)
 ########################################################### Data source
 # #id num_p mvir mbound_vir rvir vmax rvmax vrms x y z vx vy vz Jx Jy Jz E Spin PosUncertainty VelUncertainty
 #bulk_vx bulk_vy bulk_vz BulkVelUnc n_core m200b m200c m500c m2500c Xoff Voff spin_bullock b_to_a c_to_a A[x] A[y] A[z]
@@ -100,10 +107,11 @@ if __name__ == "__main__":
 
 
 	for i in range(len(X)):
-		ax.scatter(X[i],Y[i],Z[i],c='black', alpha=0.9, marker='.',s=Rvir[i])#15)#,s= (10.0*np.log10(Mvir[i])))
+		PlotShpere(ax,Rvir[i],X[i],Y[i],Z[i])
+		ax.scatter(X[i],Y[i],Z[i],c='black', alpha=0.9, marker='.',s=15)#Rvir[i])#15)#,s= (10.0*np.log10(Mvir[i])))
 		ax.text(X[i],Y[i],Z[i],'%s' %str(Id[i]), size=7)
 	if args.plotDwarfs==1:
-		ax.scatter(XDwarfs,YDwarfs,ZDwarfs,c='gray',alpha=0.8,marker='.',s=1)
+		ax.scatter(XDwarfs,YDwarfs,ZDwarfs,c='r',alpha=0.8,marker='o',s=8)
 
 	fig.set_size_inches(14,8)
 	ax.set_xlabel('X (Mpc)')
