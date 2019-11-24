@@ -184,7 +184,7 @@ class ellipsoid:
         i=j=0
         c=0
         #N=2#len() use mass instead, you won't need to count!
-        shape=[[0,0,0],[0,0,0],[0,0,0]]#np.array([[0,0,0,],[0,0,0,],[0,0,0]])
+        shape=[[1,0,0],[0,1,0],[0,0,1]]#np.array([[0,0,0,],[0,0,0,],[0,0,0]])
         s=0
         #points=coords[(coord[not IsInside()]) && ]
         #for i in range(0,3):
@@ -232,8 +232,8 @@ def CompareEllipsoids(ell1,ell2):
         if(c==3):
             AreSame=True
     return AreSame;
-def GetShape(h,ds):
-    FullShape=[]
+def GetShape(h,ds,excludeSubhalos):
+    #FullShape=[]
     ad = ds.all_data()
     coordinatesDM = ad[("Halo","Coordinates")]
     #dds = halo.halo_catalog.data_ds
@@ -260,9 +260,10 @@ def GetShape(h,ds):
     r=np.sqrt(r2)
     print(r)
     #coords=coordinatesDM[np.abs(r-np.sqrt(c2)<Rvir)]
-    coords=coordsDM[r<=Rvir]
+    coords=coordsDM[r<Rvir]
     print("# of virialized particles:%d"%len(coords))
     print(coords)
+    #now lets remove subhalo particles
     #coords[:,0]-=center[0]
     #coords[:,1]-=center[1]
     #coords[:,2]-=center[2]
@@ -278,11 +279,12 @@ def GetShape(h,ds):
     # REMOVE
     #Rvir=10
 	# Rem
-    bins=5
+    bins=7
     iteLim=2
     #convLim=5 nor need, we just compare two
     #Rbins=np.logspace(0,Rvir,bins)#(Rvir/bins,Rvir,bins)
     Rbins=np.linspace(0,Rvir,bins+1)
+    FullShape=[None]*len(Rbins-1)
     print("Rbins:")
     print(Rbins)
     axis=np.array([Rbins[1],Rbins[1],Rbins[1]])
@@ -334,7 +336,7 @@ def GetShape(h,ds):
                     orientation=orientationNew
                 if(iteration>=iteLim):
                     print("S didn't converge for halo %d"%hid)
-                    convergence=True
+                    #convergence=True
             else:
                 vol=reduce(mul,axisNew)
                 print(vol)
@@ -346,7 +348,8 @@ def GetShape(h,ds):
             iteration+=1
         axis.sort()
         Rave=(Rbins[i]+Rbins[i+1])/2.
-        FullShape.append(shape(h.id,h.R,h.M,Rave,axis))
+        #FullShape.append(shape(h.id,h.R,h.M,Rave,axis))
+        FullShape[i]=shape(h.id,h.R,h.M,Rave,axis)
         #a[i]=axis[0] # use max instead
         #b[i]=axis[1]
         #c[i]=axis[2] # use min instead
@@ -363,8 +366,8 @@ def GetShape(h,ds):
 
 
 
-#how to run: python ShapeAnalysis.py snapshot_file halo_catalog check_contamination extract_shape
-#example: $python ShapeAnalysis.py snap_264 halos_0.0.bin 1 1
+#how to run: python ShapeAnalysis.py snapshot_file halo_catalog check_contamination extract_shape exclude_subhalos
+#example: $python ShapeAnalysis.py snap_264 halos_0.0.bin 1 1 1
 
 if __name__ == "__main__":
 	parser = argparse.ArgumentParser()
@@ -372,6 +375,7 @@ if __name__ == "__main__":
 	parser.add_argument("halo",type=str)
 	parser.add_argument("contamination", type=int)
 	parser.add_argument("extractshape", type=int)
+	parser.add_argument("excludeSubhalos", type=int)
 	args = parser.parse_args()
 	ds = yt.load(args.snap)#, unit_base=unit_base1)#,unit_system='galactic')
 	if ds is None:
@@ -401,9 +405,9 @@ if __name__ == "__main__":
 	#print("Mvir=%g-Rvir:%g"%(masses,Rvir))
 	Idh=np.array(dh[:,0])
 	#CountAll= len(id)
-	p=1000
-	UpperMass=1.6e12
-	LowerMass=1.9e11
+	p=4000
+	UpperMass=1.4e12
+	LowerMass=1.1e12
 	pnumh=np.array(dh[:,1])
 	Mvirh=np.array(dh[:,2])
 	Rvirh=np.array(dh[:,4])# in kpc
@@ -470,7 +474,7 @@ if __name__ == "__main__":
 	if(args.extractshape == 1):
 		print("Let's extract the shape!")
 		for EachHalo in h:
-			HShape=GetShape(EachHalo,ds)
+			HShape=GetShape(EachHalo,ds,args.excludeSubhalos)
 			#FinalHaloShape.append(GetShape(EachHalo,ds))
 			#for sbin in HShape:
 			ba=np.array(HShape[0].b_a)

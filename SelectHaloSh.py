@@ -55,9 +55,9 @@ if __name__ == "__main__":
 	#to see smaller satellites
 	IdDwarfs=IdAll[MvirAll<MinMass]
 	RvirDwarfs=RvirAll[MvirAll<MinMass]
-	XDwarfs=XAll[MvirAll<(MinMass*10)]
-	YDwarfs=YAll[MvirAll<(MinMass*10)]
-	ZDwarfs=ZAll[MvirAll<(MinMass*10)]
+	XDwarfs=XAll[MvirAll<(MinMass)]
+	YDwarfs=YAll[MvirAll<(MinMass)]
+	ZDwarfs=ZAll[MvirAll<(MinMass)]
 
 
 	# remove hlos with particle number less than NumLimit
