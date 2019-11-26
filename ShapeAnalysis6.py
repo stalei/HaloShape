@@ -237,6 +237,7 @@ def GetShape(h,ds,plist):
     ad = ds.all_data()
     coordinatesDM = ad[("Halo","Coordinates")]
     IDsDM = ad[("Halo","ParticleIDs")]
+    hid =h.id# halo.quantities['particle_identifier']
     #dds = halo.halo_catalog.data_ds
     #center = dds.arr([halo.quantities["particle_position_%s" % axis] \
     #for axis in "xyz"])
@@ -259,17 +260,30 @@ def GetShape(h,ds,plist):
         r2+=(coordsDM[:,i])**2.
         #c2+=(center[i])**2.
     r=np.sqrt(r2)
-    print(r)
+    #print(r)
     #coords=coordinatesDM[np.abs(r-np.sqrt(c2)<Rvir)]
     coordsVir=coordsDM[r<Rvir]
     if plist==0:
         coords=coordsVir
     else:
-        subPs=np.genfromtxt(plist, skip_header=18)
-        subPids==np.array(data[:,1])
-        coords=coordsVir[IDsDM !=subPids]]
+        print(plist)
+        subPs=np.genfromtxt(plist, skip_header=18,comments='#')
+        subHids=np.array(subPs[:,7])
+        subPids=np.array(subPs[:,6])
+        subx=np.array(subPs[:,0])
+        suby=np.array(subPs[:,1])
+        subz=np.array(subPs[:,2])
+        subr=np.sqrt((subx-h.pos[0])**2.+(suby-h.pos[1])**2.+(subz-h.pos[2])**2.)
+        subr2=sunr[subr<h.R]
+        subPids2=subPids[subr<h.R]
+        subHids2=subHids[subr<h.R]
+        subPids3=subPids2[subHids2 !=hid]
+        print(subPids2)
+        for id in IDsDM:
+            if  len([subPids==id])
+        #coords=coordsVir[IDsDM !=subPids]]
     print("# of virialized particles:%d"%len(coords))
-    print(coords)
+    #print(coords)
     #now lets remove subhalo particles
     #coords[:,0]-=center[0]
     #coords[:,1]-=center[1]
@@ -278,7 +292,6 @@ def GetShape(h,ds,plist):
     Pmass=ad[("Halo","Mass")].in_units('Msun')
     print("Individual particle mass: %g"%Pmass[0])
     #print(len(IDsDM))
-    hid =h.id# halo.quantities['particle_identifier']
     #halos = HaloFinder(ds, ptype=Halo, dm_only=False, total_mass=None)
     #ind = halos[0]["particle_index"] # list of particles IDs in this halo
     #print(len(ind))
