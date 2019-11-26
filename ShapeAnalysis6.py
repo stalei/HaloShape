@@ -232,10 +232,11 @@ def CompareEllipsoids(ell1,ell2):
         if(c==3):
             AreSame=True
     return AreSame;
-def GetShape(h,ds,excludeSubhalos):
+def GetShape(h,ds,plist):
     #FullShape=[]
     ad = ds.all_data()
     coordinatesDM = ad[("Halo","Coordinates")]
+    IDsDM = ad[("Halo","ParticleIDs")]
     #dds = halo.halo_catalog.data_ds
     #center = dds.arr([halo.quantities["particle_position_%s" % axis] \
     #for axis in "xyz"])
@@ -260,7 +261,13 @@ def GetShape(h,ds,excludeSubhalos):
     r=np.sqrt(r2)
     print(r)
     #coords=coordinatesDM[np.abs(r-np.sqrt(c2)<Rvir)]
-    coords=coordsDM[r<Rvir]
+    coordsVir=coordsDM[r<Rvir]
+    if plist==0:
+        coords=coordsVir
+    else:
+        subPs=np.genfromtxt(plist, skip_header=18)
+        subPids==np.array(data[:,1])
+        coords=coordsVir[IDsDM !=subPids]]
     print("# of virialized particles:%d"%len(coords))
     print(coords)
     #now lets remove subhalo particles
@@ -270,8 +277,7 @@ def GetShape(h,ds,excludeSubhalos):
     #print(coords[0,:])
     Pmass=ad[("Halo","Mass")].in_units('Msun')
     print("Individual particle mass: %g"%Pmass[0])
-    IDsDM = ad[("Halo","ParticleIDs")]
-    print(len(IDsDM))
+    #print(len(IDsDM))
     hid =h.id# halo.quantities['particle_identifier']
     #halos = HaloFinder(ds, ptype=Halo, dm_only=False, total_mass=None)
     #ind = halos[0]["particle_index"] # list of particles IDs in this halo
@@ -366,16 +372,17 @@ def GetShape(h,ds,excludeSubhalos):
 
 
 
-#how to run: python ShapeAnalysis.py snapshot_file halo_catalog check_contamination extract_shape exclude_subhalos
-#example: $python ShapeAnalysis.py snap_264 halos_0.0.bin 1 1 1
-
+#how to run: python ShapeAnalysis.py snapshot_file halo_catalog particles_list check_contamination extract_shape
+#example: $python ShapeAnalysis.py snap_264 halos_0.0.ascii halos_0.0.particles  1 1
+#if don't want to exclude subhalo particles, simply pass 0 for particle list file
 if __name__ == "__main__":
 	parser = argparse.ArgumentParser()
 	parser.add_argument("snap", type=str)
 	parser.add_argument("halo",type=str)
+	parser.add_argument("PList",type=str)
 	parser.add_argument("contamination", type=int)
 	parser.add_argument("extractshape", type=int)
-	parser.add_argument("excludeSubhalos", type=int)
+	#parser.add_argument("excludeSubhalos", type=int)
 	args = parser.parse_args()
 	ds = yt.load(args.snap)#, unit_base=unit_base1)#,unit_system='galactic')
 	if ds is None:
@@ -474,7 +481,7 @@ if __name__ == "__main__":
 	if(args.extractshape == 1):
 		print("Let's extract the shape!")
 		for EachHalo in h:
-			HShape=GetShape(EachHalo,ds,args.excludeSubhalos)
+			HShape=GetShape(EachHalo,ds,args.PList)
 			#FinalHaloShape.append(GetShape(EachHalo,ds))
 			#for sbin in HShape:
 			ba=np.array(HShape[0].b_a)
