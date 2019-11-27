@@ -263,10 +263,13 @@ def GetShape(h,ds,plist):
     #print(r)
     #coords=coordinatesDM[np.abs(r-np.sqrt(c2)<Rvir)]
     coordsVir=coordsDM[r<Rvir]
+    IDsDmVir=IDsDM[r<Rvir]
     if plist==0:
         coords=coordsVir
     else:
         print(plist)
+        #basically I have similar information but I'm openning the file because we may run the
+        #code without excluding subhalo particles! And because rockstar produces differnt halo ids than Gadget
         subPs=np.genfromtxt(plist, skip_header=18,comments='#')
         subHids=np.array(subPs[:,7])
         subPids=np.array(subPs[:,6])
@@ -274,13 +277,15 @@ def GetShape(h,ds,plist):
         suby=np.array(subPs[:,1])
         subz=np.array(subPs[:,2])
         subr=np.sqrt((subx-h.pos[0])**2.+(suby-h.pos[1])**2.+(subz-h.pos[2])**2.)
-        subr2=sunr[subr<h.R]
+        subr2=subr[subr<h.R]
         subPids2=subPids[subr<h.R]
         subHids2=subHids[subr<h.R]
         subPids3=subPids2[subHids2 !=hid]
         print(subPids2)
-        for id in IDsDM:
-            if  len([subPids==id])
+        for i in range(0,len(IDsDmVir)):
+            if len(IDsDmVir[IDsDmVir==subPids3])>0:
+                IDsDmVir[i]=0
+        coords=coordsVir[IDsDmVir>0]
         #coords=coordsVir[IDsDM !=subPids]]
     print("# of virialized particles:%d"%len(coords))
     #print(coords)
