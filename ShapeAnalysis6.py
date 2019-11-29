@@ -232,7 +232,7 @@ def CompareEllipsoids(ell1,ell2):
         if(c==3):
             AreSame=True
     return AreSame;
-def GetShape(h,ds,plist):
+def GetShape(h,ds,plist,excludesub):
     #FullShape=[]
     ad = ds.all_data()
     coordinatesDM = ad[("Halo","Coordinates")]
@@ -264,7 +264,8 @@ def GetShape(h,ds,plist):
     #coords=coordinatesDM[np.abs(r-np.sqrt(c2)<Rvir)]
     coordsVir=coordsDM[r<Rvir]
     IDsDmVir=IDsDM[r<Rvir]
-    if plist==0:
+    print(plist)
+    if excludesub==0:
         coords=coordsVir
     else:
         print("let's remove subhalo particles")
@@ -282,12 +283,14 @@ def GetShape(h,ds,plist):
         subr2=subr[subr<h.R]
         subPids2=subPids[subr<h.R]
         subHids2=subHids[subr<h.R]
-        subPids3=subPids2[subHids2 !=hid]
-        #print(subPids2)
-        for i in range(0,len(IDsDmVir)):
-            print(subPids3[IDsDmVir[i]==subPids3])
-            if len(subPids3[IDsDmVir[i]==subPids3])>0:
-                IDsDmVir[i]=0
+        subPids3=subPids[subHids ==hid]
+        print(h.R)
+        print(len(subPids2))
+        print(len(subPids3))
+        #for i in range(0,len(subPids3)):
+        #    #print(len(subPids3[IDsDmVir[i]==subPids3]))
+        #    if len(subPids3[IDsDmVir[i]==subPids3])>0:
+        #        IDsDmVir[i]=0
         coords=coordsVir[IDsDmVir>0]
         print("#After removing:%d"%len(coords))
         #coords=coordsVir[IDsDM !=subPids]]
@@ -307,8 +310,8 @@ def GetShape(h,ds,plist):
     # REMOVE
     #Rvir=10
 	# Rem
-    bins=2
-    iteLim=3
+    bins=4
+    iteLim=1
     #convLim=5 nor need, we just compare two
     #Rbins=np.logspace(0,Rvir,bins)#(Rvir/bins,Rvir,bins)
     Rbins=np.linspace(0,Rvir,bins+1)
@@ -394,8 +397,8 @@ def GetShape(h,ds,plist):
 
 
 
-#how to run: python ShapeAnalysis.py snapshot_file halo_catalog particles_list check_contamination extract_shape
-#example: $python ShapeAnalysis.py snap_264 halos_0.0.ascii halos_0.0.particles  1 1
+#how to run: python ShapeAnalysis.py snapshot_file halo_catalog particles_list check_contamination extract_shape exclude_subhalos
+#example: $python ShapeAnalysis.py snap_264 halos_0.0.ascii halos_0.0.particles  1 1 1
 #if don't want to exclude subhalo particles, simply pass 0 for particle list file
 if __name__ == "__main__":
 	parser = argparse.ArgumentParser()
@@ -404,6 +407,7 @@ if __name__ == "__main__":
 	parser.add_argument("PList",type=str)
 	parser.add_argument("contamination", type=int)
 	parser.add_argument("extractshape", type=int)
+	parser.add_argument("excludeSub", type=int)
 	#parser.add_argument("excludeSubhalos", type=int)
 	args = parser.parse_args()
 	ds = yt.load(args.snap)#, unit_base=unit_base1)#,unit_system='galactic')
@@ -503,7 +507,7 @@ if __name__ == "__main__":
 	if(args.extractshape == 1):
 		print("Let's extract the shape!")
 		for EachHalo in h:
-			HShape=GetShape(EachHalo,ds,args.PList)
+			HShape=GetShape(EachHalo,ds,args.PList, args.excludeSub)
 			#FinalHaloShape.append(GetShape(EachHalo,ds))
 			#for sbin in HShape:
 			ba=np.array(HShape[0].b_a)
