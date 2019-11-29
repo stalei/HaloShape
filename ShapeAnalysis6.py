@@ -267,7 +267,9 @@ def GetShape(h,ds,plist):
     if plist==0:
         coords=coordsVir
     else:
+        print("let's remove subhalo particles")
         print(plist)
+        print("#before removing:%d"%len(IDsDmVir))
         #basically I have similar information but I'm openning the file because we may run the
         #code without excluding subhalo particles! And because rockstar produces differnt halo ids than Gadget
         subPs=np.genfromtxt(plist, skip_header=18,comments='#')
@@ -281,11 +283,13 @@ def GetShape(h,ds,plist):
         subPids2=subPids[subr<h.R]
         subHids2=subHids[subr<h.R]
         subPids3=subPids2[subHids2 !=hid]
-        print(subPids2)
+        #print(subPids2)
         for i in range(0,len(IDsDmVir)):
-            if len(IDsDmVir[IDsDmVir==subPids3])>0:
+            print(subPids3[IDsDmVir[i]==subPids3])
+            if len(subPids3[IDsDmVir[i]==subPids3])>0:
                 IDsDmVir[i]=0
         coords=coordsVir[IDsDmVir>0]
+        print("#After removing:%d"%len(coords))
         #coords=coordsVir[IDsDM !=subPids]]
     print("# of virialized particles:%d"%len(coords))
     #print(coords)
@@ -303,8 +307,8 @@ def GetShape(h,ds,plist):
     # REMOVE
     #Rvir=10
 	# Rem
-    bins=7
-    iteLim=2
+    bins=2
+    iteLim=3
     #convLim=5 nor need, we just compare two
     #Rbins=np.logspace(0,Rvir,bins)#(Rvir/bins,Rvir,bins)
     Rbins=np.linspace(0,Rvir,bins+1)
@@ -509,14 +513,14 @@ if __name__ == "__main__":
 			pid=[]
 			pc_a=[]
 			pT=[]
-			for s in HShape:
+			for sh in HShape:
 				#ax1.plot(s.R,s.b_a) or ax1.scatter(s.R,s.b_a,c='black', alpha=0.9, marker='.',s=15)
 				#ax1.scatter( (s.R)*1000,s.b_a, alpha=0.9, marker='.',s=15)
-				pR.append(s.R*1000)
-				pb_a.append(s.b_a)
-				pc_a.append(s.c_a)
-				pid.append(s.hid)
-				pT.append(s.T)
+				pR.append(sh.R*1000)
+				pb_a.append(sh.b_a)
+				pc_a.append(sh.c_a)
+				pid.append(sh.hid)
+				pT.append(sh.T)
 			ax1.title.set_text('b/a')
 			ax2.title.set_text('c/a')
 			ax3.title.set_text('T')
