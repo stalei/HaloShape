@@ -30,6 +30,23 @@ from operator import mul
 from functools import reduce
 import matplotlib.pyplot as plt
 
+class MomentShape:
+    def __init__(self,Rv,NBins):
+        self.a=[0.]*NBins
+        self.b=[0.]*NBins
+        self.b_a=[0.]*NBins
+        self.c_a=[0.]*NBins
+        self.T=[0.]*NBins
+        self.R=[0.]*NBins
+    def SetBinShape(self,i,R,axis):
+        axis.sort()
+        self.a[i]=axis[2]
+        self.b[i]=axis[1]
+        self.c[i]=axis[0]
+
+
+
+
 class Halo:
     def __init__(self,x,y,z,R,M,pnum,id):
         center=np.zeros(3)
@@ -93,9 +110,14 @@ class Halo:
             pyh=py[pHids==self.id]
             pzh=pz[pHids==self.id]
             subr=np.sqrt((pxh-self.pos[0])**2.+(pyh-self.pos[1])**2.+(pzh-self.pos[2])**2.)
+            #virialized
             pxh2=pxh[subr<self.Rv]
             pyh2=pyh[subr<self.Rv]
             pzh2=pzh[subr<self.Rv]
+            #with respect to center coordinate shift
+            pxh2-=self.pos[0]
+            pyh2-=self.pos[1]
+            pzh2-=self.pos[2]
             coordsArray=np.array((pxh2,pyh2,pzh2))
             coordsHalo =coordsArray.T# we need to reshape
             return coordsHalo
@@ -108,12 +130,8 @@ class Halo:
             #center = dds.arr([halo.quantities["particle_position_%s" % axis] \
             #for axis in "xyz"])
             c2=r2=0
-            #center*=3.24078e-25
-            #center=center.in_units('Mpc')
             center =h.pos# dds.arr([halo.quantities["particle_position_%s" % axis] \
             Rvir=h.Rv
-            #print("halo center (Mpc):")
-            #print(center)
             coordsDM=np.array(coordinatesDM.v)
             for i in range(0,3):
                 #print(coordsDM[:,i])
@@ -131,6 +149,10 @@ class Halo:
             coordsVir=coordsDM[r<Rvir]
             IDsDmVir=IDsDM[r<Rvir]
             return coordsVir
+    def ExtractShape(self,coords,NBins,NIteration):
+        HShape=MomentShape(self.Rv,NBins)#define an empty shape object
+        return HShape
+
 
 ##################################################################
 #tools for the shape
@@ -149,8 +171,8 @@ if __name__ == "__main__":
     parser.add_argument("LMass",type=float)
     parser.add_argument("contamination", type=int)
     parser.add_argument("extractShape", type=int)
-    parser.add_argument("BinNum", type=int)
-    parser.add_argument("IterationLim", type=int)
+    parser.add_argument("NBins", type=int)
+    parser.add_argument("NIteration", type=int)
     #parser.add_argument("excludeSubhalos", type=int)
     args = parser.parse_args()
     #read the snapshot file
@@ -186,7 +208,7 @@ if __name__ == "__main__":
     Rvh/=1000 # convert from kpc to Mpc
     halo=[]#*len(MvH)
     print("found %d halos in the given interval"%len(Mvh))
-    if len(Mvh)>0:
+    if len(Mvh)>0: #A
 
         for i in range(0,len(Mvh)):
             halo.append(Halo(xh[i],yh[i],zh[i],Rvh[i],Mvh[i],ph[i],Idh[i]))
@@ -212,5 +234,9 @@ if __name__ == "__main__":
                 #
                 PcoordsSub=h.ExtractParticles(snap,halos,plist,False)
                 PcoordsNoSub=h.ExtractParticles(snap,halos,plist,True)
+                Shape=h.ExtractShape(PcoordsSub,args.NBins,args.NIteration)
+                ShapeNoSub=h.ExtractShape(PcoordsNoSub,args.NBins,args.NIteration)
                 print("%d -- %g -- %f -- %d -- %d -- %d -- %d"%(h.id,h.Mv,h.Rv,h.pnum,h.contamination,len(PcoordsSub),len(PcoordsNoSub)))
         print("################################################################################")
+    else: #A
+        print("No halo found in the given range!")
