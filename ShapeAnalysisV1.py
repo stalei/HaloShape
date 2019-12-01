@@ -43,7 +43,81 @@ class MomentShape:
         self.a[i]=axis[2]
         self.b[i]=axis[1]
         self.c[i]=axis[0]
-
+class EllipsoidShell:
+    def __init__(self,axis,orientation,Rin,Rout):
+        #I have to sort in this level
+        aIndex=np.argmax(axis)
+        cIndex=np.argmin(axis)
+        if aIndex ==cIndex:
+            self.axis=axis
+            self.orientation=orientation
+        else:
+            bIndex=3-aIndex-cIndex # sum of indexes is always 3
+            self.axis=np.array([axis[aIndex],axis[bIndex],axis[cIndex]])#.sort()
+            self.orientation=np.array([orientation[:,aIndex],orientation[:,bIndex],orientation[:,cIndex]])
+        print(self.orientation)
+        self.Rin=Rin
+        self.Rout=Rout
+        self.b_a=self.axis[1]/self.axis[0]
+        self.c_a=self.axis[2]/self.axis[0]
+    def IsInside(self,point,Rin,Rout):
+        t=0
+        pNew=np.array([0.0,0.0,0.0])
+        for i in range(0,3):
+            for j in range(0,3):
+                pNew[i]+=point[j]*self.orientation[j,i] # each eig vec is [:,i] comp
+        #for i in range(0,3):
+        #    t+=(pNew[i]/(self.axis[i]))**2.
+        t=np.sqrt(pNew[0]**2.+(pNew[1]/self.b_a)**2.+(pNew[2]**2./self.c_a)**2.)
+        #print(t)
+        if (t<=Rout and t>=Rin):
+            return True
+        else:
+            return False
+    def MomentTensor(self,coords,Rin,Rout):
+        i=j=0
+        c=0
+        shape=[[1,0,0],[0,1,0],[0,0,1]]#np.array([[0,0,0,],[0,0,0,],[0,0,0]])
+        s=0
+        for i in range(0,3):
+            for j in range(0,3):
+                c=s=0
+                print("s[%d,%d]"%(i,j))
+                for point in coords:
+                    #print("point before if:")
+                    #print(point)
+                    if(self.IsInside(point,Rin,Rout)):
+                        s+=point[i]*point[j]
+                        c+=1
+                #Mtot=c*m
+                if c>1:
+                    shape[i][j]=s/(c-1)
+                print("particle count for %g<R<%g=%d"%(Rin,Rout,c))
+        return shape
+#def GetShellShape(self,sTen,)
+def CompareShapes(ell1,ell2):
+    AreSame=False;
+    error=5.0e-2
+    c=0
+    inP=np.array([0,0,0])
+    dRatio=np.array([0,0])
+    #we have to sort axis before we compare them
+    for i in range(1,3):
+        if(ell1.axis[0] !=0):
+            dRatio[i-1]=np.abs((ell1.axis[i]/ell1.axis[0])/(ell2.axis[i]/ell2.axis[0]))
+        #dRatio[i-1]=0
+    #dori=np.abs(np.divide(ell1.orientations/ell2.orientations))
+    d=dRatio[(dRatio<1+error) & (dRatio>1-error)]
+    print(d)
+    if(len(d)==0):
+        for i in range(0,3):
+            for j in range(0,3):
+                inP[i]+=ell1.orientations[j,i]*ell2.orientations[j,i]
+            if(inP[i]<((ell1.axis[i])**2.+error) and inP[i]>((ell1.axis[i])**2.-error)):
+                c+=1
+        if(c==3):
+            AreSame=True
+    return AreSame;
 
 
 
@@ -151,6 +225,50 @@ class Halo:
             return coordsVir
     def ExtractShape(self,coords,NBins,NIteration):
         HShape=MomentShape(self.Rv,NBins)#define an empty shape object
+        #let's create bins
+        Rbins=np.linspace(0,self.Rv,NBins+1)
+        Rs=[0]*NBins
+        for i in range(0,NBins):
+            Rs[i]=(Rbins[i]+Rbins[i+1])/2.
+        print("bins:")
+        print(Rbins)
+        print("Rs:")
+        print(Rs)
+        #loop on bins starts here
+        i=0
+        convergence=False
+        iteration=0
+        #
+        Rin=Rbins[0]
+        Rout=Rbins[NBins]
+        axis=np.array([Rout,Rout,Rout])
+        orientation=np.identity(3)
+        print(orientation)
+        v0=reduce(mul,axis)
+        #iteration starts here
+        while(not(convergence)):
+            match=0
+            ellshell=EllipsoidShell(axis,orientation,Rin,Rout)
+            MTensor=ellshell.MomentTensor(coords,Rin,Rout)
+            print(MTensor)
+            axisNew,orientationNew=LA.eig(MTensor)
+            v=reduce(mul,axisNew)
+            norm=(v0/v)**(1./3.)
+            axisNormalized=[ax*norm for ax in axisNew]
+            print(axisNew)
+            print(axisNormalized)
+            ellshellNew=EllipsoidShell(axisNormalized,orientationNew,Rin,Rout)
+            if CompareShapes(ellshell,ellshellNew):
+                match+=1
+            else:
+                match=0
+            iteration+=1
+            axis=axisNormalized
+            orientation=orientationNew
+            if iteration>=NIteration:
+                convergence=True
+                print("The shape didn't converge but we reached the iteration limit for shell:%f"%Rs[i])
+            #convergence=True
         return HShape
 
 
@@ -230,6 +348,7 @@ if __name__ == "__main__":
         if(args.extractShape==1):
             #print("let's extract the shape")
             for h in halo:
+                #print("%d -- %g -- %f -- %d -- %d -- %d -- %d"%(h.id,h.Mv,h.Rv,h.pnum,h.contamination,len(PcoordsSub),len(PcoordsNoSub)))
                 #extract coordinates
                 #
                 PcoordsSub=h.ExtractParticles(snap,halos,plist,False)
