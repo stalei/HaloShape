@@ -99,7 +99,7 @@ def CompareShapes(ell1,ell2):
     AreSame=False;
     error=5.0e-2
     c=0
-    inP=np.array([0,0,0])
+    #inP=np.array([0,0,0])
     dRatio=np.array([0,0])
     #we have to sort axis before we compare them
     for i in range(1,3):
@@ -109,10 +109,12 @@ def CompareShapes(ell1,ell2):
     #dori=np.abs(np.divide(ell1.orientations/ell2.orientations))
     d=dRatio[(dRatio<1+error) & (dRatio>1-error)]
     print(d)
-    if(len(d)==0):
+    if(len(d)==2):
         for i in range(0,3):
+            inP=np.array([0,0,0])
             for j in range(0,3):
-                inP[i]+=ell1.orientations[j,i]*ell2.orientations[j,i]
+                inP[i]+=ell1.orientation[j,i]*ell2.orientation[j,i]
+            print(inP[i])
             if(inP[i]<((ell1.axis[i])**2.+error) and inP[i]>((ell1.axis[i])**2.-error)):
                 c+=1
         if(c==3):
@@ -247,6 +249,7 @@ class Halo:
         v0=reduce(mul,axis)
         #iteration starts here
         while(not(convergence)):
+            print("Iteration:%d"%iteration)
             match=0
             ellshell=EllipsoidShell(axis,orientation,Rin,Rout)
             MTensor=ellshell.MomentTensor(coords,Rin,Rout)
@@ -260,12 +263,17 @@ class Halo:
             ellshellNew=EllipsoidShell(axisNormalized,orientationNew,Rin,Rout)
             if CompareShapes(ellshell,ellshellNew):
                 match+=1
+                print("we converged in shape for %f"%Rs[i])
+                convergence=True
             else:
                 match=0
             iteration+=1
             axis=axisNormalized
             orientation=orientationNew
-            if iteration>=NIteration:
+            #if(match>=1):
+            #    print("we converged in shape for %f"%Rs[i])
+            #    convergence=True
+            if (iteration>=NIteration):
                 convergence=True
                 print("The shape didn't converge but we reached the iteration limit for shell:%f"%Rs[i])
             #convergence=True
