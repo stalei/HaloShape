@@ -34,15 +34,20 @@ class MomentShape:
     def __init__(self,Rv,NBins):
         self.a=[0.]*NBins
         self.b=[0.]*NBins
+        self.c=[0.]*NBins
         self.b_a=[0.]*NBins
         self.c_a=[0.]*NBins
         self.T=[0.]*NBins
         self.R=[0.]*NBins
-    def SetBinShape(self,i,R,axis):
-        axis.sort()
-        self.a[i]=axis[2]
-        self.b[i]=axis[1]
-        self.c[i]=axis[0]
+    def SetBinShape(self,i,R,ellipsoid):
+        ellipsoid.axis.sort()
+        self.a[i]=ellipsoid.axis[0]
+        self.b[i]=ellipsoid.axis[1]
+        self.c[i]=ellipsoid.axis[2]
+        self.b_a[i]=ellipsoid.b_a
+        self.c_a[i]=ellipsoid.c_a
+        self.T[i]=(ellipsoid.axis[0]**2.-ellipsoid.axis[1]**2.)/(ellipsoid.axis[0]**2.-ellipsoid.axis[2]**2.)
+        self.R[i]=R
 class EllipsoidShell:
     def __init__(self,axis,orientation,Rin,Rout):
         #I have to sort in this level
@@ -97,7 +102,7 @@ class EllipsoidShell:
 #def GetShellShape(self,sTen,)
 def CompareShapes(ell1,ell2):
     AreSame=False;
-    error=5.0e-2
+    error=1.0e-1
     c=0
     #inP=np.array([0,0,0])
     dRatio=np.array([0,0])
@@ -237,46 +242,49 @@ class Halo:
         print("Rs:")
         print(Rs)
         #loop on bins starts here
-        i=0
-        convergence=False
-        iteration=0
-        #
-        Rin=Rbins[0]
-        Rout=Rbins[NBins]
-        axis=np.array([Rout,Rout,Rout])
-        orientation=np.identity(3)
-        print(orientation)
-        v0=reduce(mul,axis)
-        #iteration starts here
-        while(not(convergence)):
-            print("Iteration:%d"%iteration)
-            match=0
-            ellshell=EllipsoidShell(axis,orientation,Rin,Rout)
-            MTensor=ellshell.MomentTensor(coords,Rin,Rout)
-            print(MTensor)
-            axisNew,orientationNew=LA.eig(MTensor)
-            v=reduce(mul,axisNew)
-            norm=(v0/v)**(1./3.)
-            axisNormalized=[ax*norm for ax in axisNew]
-            print(axisNew)
-            print(axisNormalized)
-            ellshellNew=EllipsoidShell(axisNormalized,orientationNew,Rin,Rout)
-            if CompareShapes(ellshell,ellshellNew):
-                match+=1
-                print("we converged in shape for %f"%Rs[i])
-                convergence=True
-            else:
+        for i in range(0,NBins-1):
+            i=0
+            convergence=False
+            iteration=0
+            #
+            Rin=Rbins[i]
+            Rout=Rbins[i+1]
+            axis=np.array([Rout,Rout,Rout])
+            orientation=np.identity(3)
+            print(orientation)
+            v0=reduce(mul,axis)
+            #iteration starts here
+            while(not(convergence)):
+                print("Iteration:%d"%iteration)
                 match=0
-            iteration+=1
-            axis=axisNormalized
-            orientation=orientationNew
-            #if(match>=1):
-            #    print("we converged in shape for %f"%Rs[i])
-            #    convergence=True
-            if (iteration>=NIteration):
-                convergence=True
-                print("The shape didn't converge but we reached the iteration limit for shell:%f"%Rs[i])
-            #convergence=True
+                ellshell=EllipsoidShell(axis,orientation,Rin,Rout)
+                MTensor=ellshell.MomentTensor(coords,Rin,Rout)
+                print(MTensor)
+                axisNew,orientationNew=LA.eig(MTensor)
+                v=reduce(mul,axisNew)
+                norm=(v0/v)**(1./3.)
+                axisNormalized=[ax*norm for ax in axisNew]
+                print(axisNew)
+                print(axisNormalized)
+                ellshellNew=EllipsoidShell(axisNormalized,orientationNew,Rin,Rout)
+                if CompareShapes(ellshell,ellshellNew):
+                    match+=1
+                    print("we converged in shape for %f"%Rs[i])
+                    convergence=True
+                else:
+                    match=0
+                iteration+=1
+                axis=axisNormalized
+                orientation=orientationNew
+                #if(match>=1):
+                #    print("we converged in shape for %f"%Rs[i])
+                #    convergence=True
+                if (iteration>=NIteration):
+                    convergence=True
+                    print("The shape didn't converge but we reached the iteration limit for shell:%f"%Rs[i])
+                if(convergence==True):
+                    ellshape=EllipsoidShell(axis,orientation,Rin,Rout)
+            HShape.SetBinShape(i,Rs[i],ellshape)
         return HShape
 
 
