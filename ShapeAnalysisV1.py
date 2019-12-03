@@ -192,9 +192,10 @@ class Halo:
             pzh=pz[pHids==self.id]
             subr=np.sqrt((pxh-self.pos[0])**2.+(pyh-self.pos[1])**2.+(pzh-self.pos[2])**2.)
             #virialized
-            pxh2=pxh[subr<self.Rv]
-            pyh2=pyh[subr<self.Rv]
-            pzh2=pzh[subr<self.Rv]
+            Rcut=1.2*self.Rv
+            pxh2=pxh[subr<Rcut]
+            pyh2=pyh[subr<Rcut]
+            pzh2=pzh[subr<Rcut]
             #with respect to center coordinate shift
             pxh2-=self.pos[0]
             pyh2-=self.pos[1]
@@ -212,7 +213,7 @@ class Halo:
             #for axis in "xyz"])
             c2=r2=0
             center =h.pos# dds.arr([halo.quantities["particle_position_%s" % axis] \
-            Rvir=h.Rv
+            Rcut=1.2*h.Rv
             coordsDM=np.array(coordinatesDM.v)
             for i in range(0,3):
                 #print(coordsDM[:,i])
@@ -227,8 +228,8 @@ class Halo:
             r=np.sqrt(r2)
             #print(r)
             #coords=coordinatesDM[np.abs(r-np.sqrt(c2)<Rvir)]
-            coordsVir=coordsDM[r<Rvir]
-            IDsDmVir=IDsDM[r<Rvir]
+            coordsVir=coordsDM[r<Rcut]
+            IDsDmVir=IDsDM[r<Rcut]
             return coordsVir
     def ExtractShape(self,coords,NBins,NIteration):
         HShape=MomentShape(self.Rv,NBins)#define an empty shape object
@@ -242,13 +243,13 @@ class Halo:
         print("Rs:")
         print(Rs)
         #loop on bins starts here
-        for i in range(0,NBins-1):
-            i=0
+        for i in range(0,NBins):
             convergence=False
             iteration=0
             #
             Rin=Rbins[i]
             Rout=Rbins[i+1]
+            Rs[i]=(Rbins[i]+Rbins[i+1])/2.
             axis=np.array([Rout,Rout,Rout])
             orientation=np.identity(3)
             print(orientation)
@@ -383,11 +384,17 @@ if __name__ == "__main__":
                 PcoordsNoSub=h.ExtractParticles(snap,halos,plist,True)
                 Shape=h.ExtractShape(PcoordsSub,args.NBins,args.NIteration)
                 ShapeNoSub=h.ExtractShape(PcoordsNoSub,args.NBins,args.NIteration)
+                #print(Shape.R)
+                #print(Shape.b_a)
+                ax1.plot(Shape.R,Shape.b_a,linestyle='-',label=str(h.id))
+                ax1.plot(ShapeNoSub.R,ShapeNoSub.b_a,linestyle='-.',label="NoSub"+str(h.id))
+                ax2.plot(Shape.R,Shape.c_a,linestyle='-',label=str(h.id))
+                ax2.plot(ShapeNoSub.R,ShapeNoSub.c_a,linestyle='-.',label="NoSub"+str(h.id))
+                ax3.plot(Shape.R,Shape.T,linestyle='-',label=str(h.id))
+                ax3.plot(ShapeNoSub.R,ShapeNoSub.T,linestyle='-.',label="NoSub"+str(h.id))
+                ax4.plot(Shape.c_a,Shape.b_a,'bo',label=str(h.id))
+                ax4.plot(ShapeNoSub.c_a,ShapeNoSub.b_a,'ro',label="NoSub"+str(h.id))
                 print("%d -- %g -- %f -- %d -- %d -- %d -- %d"%(h.id,h.Mv,h.Rv,h.pnum,h.contamination,len(PcoordsSub),len(PcoordsNoSub)))
-                ax1.plot(Shape.R,Shape.b_a,label=str(h.id))
-                ax2.plot(Shape.R,Shape.c_a,label=str(h.id))
-                ax3.plot(Shape.R,Shape.T,label=str(h.id))
-                ax4.plot(Shape.c_a,Shape.b_a,'o',label=str(h.id))
         print("################################################################################")
     else: #A
         print("No halo found in the given range!")
