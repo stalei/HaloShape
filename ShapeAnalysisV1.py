@@ -296,7 +296,6 @@ class Halo:
 
     #how to run: python ShapeAnalysis.py snapshot_file halo_catalog particles_list check_contamination extract_shape bin_number iteration
     #example: $python ShapeAnalysisV1.py snap_264 halos_0.0.ascii halos_0.0.particles 1.4e12 1.1e12   1 1 5 3
-    #if don't want to exclude subhalo particles, simply pass 0 for particle list file
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("snap", type=str)
