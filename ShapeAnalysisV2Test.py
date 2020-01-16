@@ -331,7 +331,7 @@ if __name__ == "__main__":
     ppx=np.squeeze(rMesh)*np.sin(np.squeeze(tetMesh))*np.cos(np.squeeze(fiMesh))
     ppy=np.squeeze(rMesh)*np.sin(np.squeeze(tetMesh))*np.sin(np.squeeze(fiMesh))
     ppz=np.squeeze(rMesh)*np.cos(np.squeeze(tetMesh))
-    print(ppx)
+    print(ppx.shape)
     #ppx, ppy, ppz =1e2*np.random.normal(size=[3, n_particles])
     ppm = np.ones(n_particles)
     data = {'particle_position_x': ppx,'particle_position_y': ppy,'particle_position_z': ppz,'particle_mass': ppm}
