@@ -30,6 +30,7 @@ from numpy import linalg as LA
 from operator import mul
 from functools import reduce
 import matplotlib.pyplot as plt
+from yt.units import parsec, Msun, Mpc
 
 class MomentShape:
     def __init__(self,Rv,NBins):
@@ -206,8 +207,13 @@ class Halo:
             return coordsHalo
         else:
             ad = snap.all_data()
-            coordinatesDM = ad[("Halo","Coordinates")]
-            IDsDM = ad[("Halo","ParticleIDs")]
+            xp=ad[("all","particle_position_x")]
+            yp=ad[("all","particle_position_y")]
+            zp=ad[("all","particle_position_z")]
+            coordsArray=np.array((xp,yp,zp))
+            coordinatesDM =coordsArray.T# we need to reshape
+            #coordinatesDM = ad[("Halo","Coordinates")]
+            #IDsDM = ad[("Halo","ParticleIDs")]
             hid =h.id# halo.quantities['particle_identifier']
             #dds = halo.halo_catalog.data_ds
             #center = dds.arr([halo.quantities["particle_position_%s" % axis] \
@@ -215,7 +221,7 @@ class Halo:
             c2=r2=0
             center =h.pos# dds.arr([halo.quantities["particle_position_%s" % axis] \
             Rcut=1.2*h.Rv
-            coordsDM=np.array(coordinatesDM.v)
+            coordsDM=np.array(coordinatesDM)#.v)
             for i in range(0,3):
                 #print(coordsDM[:,i])
                 #print(center[i])
@@ -230,7 +236,7 @@ class Halo:
             #print(r)
             #coords=coordinatesDM[np.abs(r-np.sqrt(c2)<Rvir)]
             coordsVir=coordsDM[r<Rcut]
-            IDsDmVir=IDsDM[r<Rcut]
+            #IDsDmVir=IDsDM[r<Rcut]
             return coordsVir
     def ExtractShape(self,coords,NBins,NIteration):
         HShape=MomentShape(self.Rv,NBins)#define an empty shape object
@@ -295,67 +301,87 @@ class Halo:
 
 
 
-    #how to run: python ShapeAnalysis.py snapshot_file halo_catalog particles_list check_contamination extract_shape bin_number iteration
-    #example: $python ShapeAnalysisV1.py snap_264 halos_0.0.ascii halos_0.0.particles 1.4e12 1.1e12   1 1 5 3
+    #how to run: python ShapeAnalysis.py  bin_number iteration
+    #example: $python ShapeAnalysisV2Test.py  5 30
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("snap", type=str)
-    parser.add_argument("halo",type=str)
-    parser.add_argument("PList",type=str)
-    parser.add_argument("UMass",type=float)
-    parser.add_argument("LMass",type=float)
-    parser.add_argument("contamination", type=int)
-    parser.add_argument("extractShape", type=int)
+    #parser.add_argument("snap", type=str)
+    #parser.add_argument("halo",type=str)
+    #parser.add_argument("PList",type=str)
+    #parser.add_argument("UMass",type=float)
+    #parser.add_argument("LMass",type=float)
+    #parser.add_argument("contamination", type=int)
+    #parser.add_argument("extractShape", type=int)
     parser.add_argument("NBins", type=int)
     parser.add_argument("NIteration", type=int)
     #parser.add_argument("excludeSubhalos", type=int)
     args = parser.parse_args()
     #read the snapshot file
-    snap = yt.load(args.snap)#, unit_base=unit_base1)#,unit_system='galactic')
-    if snap is None:
-        print ("Error, sorry, I couldn't read the snapshot.!")
-        sys.exit(1)
-    halos=np.genfromtxt(args.halo, skip_header=18)
-    if halos is None:
-        print ("Error, sorry, I couldn't read the halo binary file.!")
-        sys.exit(1)
-    plist=np.genfromtxt(args.PList, skip_header=18,comments='#')
-    if plist is None:
-        print ("Error, sorry, I couldn't read the halo binary file.!")
-        sys.exit(1)
-    UpperMass=args.UMass
-    LowerMass=args.LMass
+    # in this test we create an arbitrary data instead of an output file
+    rRes=12
+    tetRes=12
+    fiRes=24
+    n_particles = rRes*tetRes*fiRes
+    Rvirial=200
+    rpp=np.linspace(0,Rvirial,rRes)
+    tetpp=np.linspace(0,np.pi,tetRes)
+    fipp=np.linspace(0,2.*np.pi,fiRes)
+    rMesh,tetMesh,fiMesh=np.meshgrid(rpp,tetpp,fipp)
+    print(rMesh)
+    ppx=np.squeeze(rMesh)*np.sin(np.squeeze(tetMesh))*np.cos(np.squeeze(fiMesh))
+    ppy=np.squeeze(rMesh)*np.sin(np.squeeze(tetMesh))*np.sin(np.squeeze(fiMesh))
+    ppz=np.squeeze(rMesh)*np.cos(np.squeeze(tetMesh))
+    print(ppx)
+    #ppx, ppy, ppz =1e2*np.random.normal(size=[3, n_particles])
+    ppm = np.ones(n_particles)
+    data = {'particle_position_x': ppx,'particle_position_y': ppy,'particle_position_z': ppz,'particle_mass': ppm}
+    bbox = 1.1*np.array([[min(ppx), max(ppx)], [min(ppy), max(ppy)], [min(ppz), max(ppz)]])
+    snap = yt.load_particles(data, length_unit=Mpc, mass_unit=Msun, n_ref=256, bbox=bbox)
+    #snap = yt.load(args.snap)#, unit_base=unit_base1)#,unit_system='galactic')
+    #if snap is None:
+    #    print ("Error, sorry, I couldn't read the snapshot.!")
+    #    sys.exit(1)
+    halos=0#np.genfromtxt(args.halo, skip_header=18)
+    #if halos is None:
+    #    print ("Error, sorry, I couldn't read the halo binary file.!")
+    #    sys.exit(1)
+    plist=0#np.genfromtxt(args.PList, skip_header=18,comments='#')
+    #if plist is None:
+    #    print ("Error, sorry, I couldn't read the halo binary file.!")
+    #    sys.exit(1)
+    #UpperMass=args.UMass
+    #LowerMass=args.LMass
     #read the halo info
-    pnumh=np.array(halos[:,1])
-    MvH=np.array(halos[:,2])
-    RvH=np.array(halos[:,4])# in kpc
-    xH=np.array(halos[:,8])
-    yH=np.array(halos[:,9])
-    zH=np.array(halos[:,10])
-    IdH=np.array(halos[:,0])
-    ph=pnumh[(MvH>LowerMass) & (MvH<UpperMass)]
-    Idh=IdH[(MvH>LowerMass) & (MvH<UpperMass)]
-    Mvh=MvH[(MvH>LowerMass) & (MvH<UpperMass)]
-    xh=xH[(MvH>LowerMass) & (MvH<UpperMass)]
-    yh=yH[(MvH>LowerMass) & (MvH<UpperMass)]
-    zh=zH[(MvH>LowerMass) & (MvH<UpperMass)]
-    Rvh=RvH[(MvH>LowerMass) & (MvH<UpperMass)]
+    #pnumh=np.array(halos[:,1])
+    #MvH=np.array(halos[:,2])
+    #RvH=np.array(halos[:,4])# in kpc
+    #xH=np.array(halos[:,8])
+    #yH=np.array(halos[:,9])
+    #zH=np.array(halos[:,10])
+    #IdH=np.array(halos[:,0])
+    ph=n_particles#pnumh[(MvH>LowerMass) & (MvH<UpperMass)]
+    Idh=0#IdH[(MvH>LowerMass) & (MvH<UpperMass)]
+    Mvh=1.2e12#MvH[(MvH>LowerMass) & (MvH<UpperMass)]
+    xh=0#xH[(MvH>LowerMass) & (MvH<UpperMass)]
+    yh=0#yH[(MvH>LowerMass) & (MvH<UpperMass)]
+    zh=0#zH[(MvH>LowerMass) & (MvH<UpperMass)]
+    Rvh=Rvirial#RvH[(MvH>LowerMass) & (MvH<UpperMass)]
     Rvh/=1000 # convert from kpc to Mpc
     halo=[]#*len(MvH)
-    print("found %d halos in the given interval"%len(Mvh))
-    if len(Mvh)>0: #A
-
-        for i in range(0,len(Mvh)):
-            halo.append(Halo(xh[i],yh[i],zh[i],Rvh[i],Mvh[i],ph[i],Idh[i]))
-        if(args.contamination == 1):
-            print("checking for contamination")
-            for h in halo:
-                h.contamination=h.IsContaminated(snap)
+    #print("found %d halos in the given interval"%len(Mvh))
+    if True: #A #we already have a halo
+    #    for i in range(0,len(Mvh)):
+    #        halo.append(Halo(xh[i],yh[i],zh[i],Rvh[i],Mvh[i],ph[i],Idh[i]))
+        halo.append(Halo(xh,yh,zh,Rvh,Mvh,ph,Idh))
+        #if(args.contamination == 1):
+        #    print("checking for contamination")
+        #    for h in halo:
+        #        h.contamination=h.IsContaminated(snap)
         print("ID ---- Mvirial ---- Rvirial ---- # of Ps ---- Contamination ---- [#p Vir ---- #p No Sub]")
         print("################################################################################")
-        if(args.extractShape==0):
-            for h in halo:
-                print("%d -- %g -- %f -- %d -- %d"%(h.id,h.Mv,h.Rv,h.pnum,h.contamination))
+        #if(args.extractShape==0):
+        #    for h in halo:
+        #        print("%d -- %g -- %f -- %d -- %d"%(h.id,h.Mv,h.Rv,h.pnum,h.contamination))
         #target=input("please select a halo id(-1 to quit):")
         #if target==-1:
         #    sys.exit(1)
@@ -374,27 +400,27 @@ if __name__ == "__main__":
         ax2.title.set_text('c/a')
         ax3.title.set_text('T')
         ax4.title.set_text('c/a - b/a')
-        if(args.extractShape==1):
+        if(True): # extract shape is already true and I don't want to change the structure
             #print("let's extract the shape")
             for h in halo:
                 #print("%d -- %g -- %f -- %d -- %d -- %d -- %d"%(h.id,h.Mv,h.Rv,h.pnum,h.contamination,len(PcoordsSub),len(PcoordsNoSub)))
                 #extract coordinates
                 #
                 PcoordsSub=h.ExtractParticles(snap,halos,plist,False)
-                PcoordsNoSub=h.ExtractParticles(snap,halos,plist,True)
+                #PcoordsNoSub=h.ExtractParticles(snap,halos,plist,True)
                 Shape=h.ExtractShape(PcoordsSub,args.NBins,args.NIteration)
-                ShapeNoSub=h.ExtractShape(PcoordsNoSub,args.NBins,args.NIteration)
+                #ShapeNoSub=h.ExtractShape(PcoordsNoSub,args.NBins,args.NIteration)
                 #print(Shape.R)
                 #print(Shape.b_a)
                 ax1.plot(Shape.R,Shape.b_a,linestyle='-',label=str(h.id))
-                ax1.plot(ShapeNoSub.R,ShapeNoSub.b_a,linestyle='-.',label="NoSub"+str(h.id))
+                #ax1.plot(ShapeNoSub.R,ShapeNoSub.b_a,linestyle='-.',label="NoSub"+str(h.id))
                 ax2.plot(Shape.R,Shape.c_a,linestyle='-',label=str(h.id))
-                ax2.plot(ShapeNoSub.R,ShapeNoSub.c_a,linestyle='-.',label="NoSub"+str(h.id))
+                #ax2.plot(ShapeNoSub.R,ShapeNoSub.c_a,linestyle='-.',label="NoSub"+str(h.id))
                 ax3.plot(Shape.R,Shape.T,linestyle='-',label=str(h.id))
-                ax3.plot(ShapeNoSub.R,ShapeNoSub.T,linestyle='-.',label="NoSub"+str(h.id))
+                #ax3.plot(ShapeNoSub.R,ShapeNoSub.T,linestyle='-.',label="NoSub"+str(h.id))
                 ax4.plot(Shape.c_a,Shape.b_a,'bo',label=str(h.id))
-                ax4.plot(ShapeNoSub.c_a,ShapeNoSub.b_a,'ro',label="NoSub"+str(h.id))
-                print("%d -- %g -- %f -- %d -- %d -- %d -- %d"%(h.id,h.Mv,h.Rv,h.pnum,h.contamination,len(PcoordsSub),len(PcoordsNoSub)))
+                #ax4.plot(ShapeNoSub.c_a,ShapeNoSub.b_a,'ro',label="NoSub"+str(h.id))
+                print("%d -- %g -- %f -- %d -- %d -- %d -- %d"%(h.id,h.Mv,h.Rv,h.pnum,h.contamination,len(PcoordsSub),0))
         print("################################################################################")
     else: #A
         print("No halo found in the given range!")
