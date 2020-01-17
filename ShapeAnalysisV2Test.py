@@ -31,6 +31,7 @@ from operator import mul
 from functools import reduce
 import matplotlib.pyplot as plt
 from yt.units import parsec, Msun, Mpc
+from mpl_toolkits.mplot3d import Axes3D
 
 class MomentShape:
     def __init__(self,Rv,NBins):
@@ -318,20 +319,29 @@ if __name__ == "__main__":
     args = parser.parse_args()
     #read the snapshot file
     # in this test we create an arbitrary data instead of an output file
-    rRes=12
-    tetRes=12
+    rRes=10
+    tetRes=16
     fiRes=24
     n_particles = rRes*tetRes*fiRes
-    Rvirial=200
+    Rvirial=0.2#200
     rpp=np.linspace(0,Rvirial,rRes)
-    tetpp=np.linspace(0,np.pi,tetRes)
+    tetpp=np.linspace(-np.pi,np.pi,tetRes)
     fipp=np.linspace(0,2.*np.pi,fiRes)
     rMesh,tetMesh,fiMesh=np.meshgrid(rpp,tetpp,fipp)
-    print(rMesh)
-    ppx=np.squeeze(rMesh)*np.sin(np.squeeze(tetMesh))*np.cos(np.squeeze(fiMesh))
-    ppy=np.squeeze(rMesh)*np.sin(np.squeeze(tetMesh))*np.sin(np.squeeze(fiMesh))
-    ppz=np.squeeze(rMesh)*np.cos(np.squeeze(tetMesh))
-    print(ppx.shape)
+    #rStrip=np.squeeze(np.array(rMesh))  x
+    #rStrip=rMesh[:] x
+    rStrip=np.reshape(rMesh,n_particles)
+    tetStrip=np.reshape(tetMesh,n_particles)
+    fiStrip=np.reshape(fiMesh,n_particles)
+    #print(rMesh.shape)
+    #print(rStrip.shape)
+    ppx=rStrip*np.sin(tetStrip)*np.cos(fiStrip)
+    ppy=rStrip*np.sin(tetStrip)*np.sin(fiStrip)
+    ppz=rStrip*np.cos(tetStrip)
+    fig0 = plt.figure(0,figsize=plt.figaspect(1))
+    ax0 = fig0.add_subplot(111, projection='3d')
+    ax0.scatter(ppx,ppy,ppz,c='black',alpha=0.1,marker='.',s=1)
+    #print(ppx.shape)
     #ppx, ppy, ppz =1e2*np.random.normal(size=[3, n_particles])
     ppm = np.ones(n_particles)
     data = {'particle_position_x': ppx,'particle_position_y': ppy,'particle_position_z': ppz,'particle_mass': ppm}
@@ -366,7 +376,7 @@ if __name__ == "__main__":
     yh=0#yH[(MvH>LowerMass) & (MvH<UpperMass)]
     zh=0#zH[(MvH>LowerMass) & (MvH<UpperMass)]
     Rvh=Rvirial#RvH[(MvH>LowerMass) & (MvH<UpperMass)]
-    Rvh/=1000 # convert from kpc to Mpc
+    #Rvh/=1000 # convert from kpc to Mpc
     halo=[]#*len(MvH)
     #print("found %d halos in the given interval"%len(Mvh))
     if True: #A #we already have a halo
