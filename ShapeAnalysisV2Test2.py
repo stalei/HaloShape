@@ -95,13 +95,13 @@ class EllipsoidShell:
                 print("s[%d,%d]"%(i,j))
                 for point in coords:
                     #print("point before if:")
-                    print(point)
+                    #print(point)
                     if(self.IsInside(point,Rin,Rout)):
                         s+=point[i]*point[j]
                         c+=1
                 #Mtot=c*m
-                if c>0:
-                    shape[i][j]=s/(c)
+                if c>1:
+                    shape[i][j]=s/(c-1)
                 print("particle count for %g<R<%g=%d"%(Rin,Rout,c))
         return shape
 #def GetShellShape(self,sTen,)
@@ -325,9 +325,9 @@ if __name__ == "__main__":
     args = parser.parse_args()
     #read the snapshot file
     # in this test we create an arbitrary data instead of using an output file
-    rRes=2
-    tetRes=5
-    fiRes=4
+    rRes=4
+    tetRes=64
+    fiRes=24
     n_particles = rRes*tetRes*fiRes
     Rvirial=0.2#200
     rpp=np.linspace(0.001,Rvirial-0.001,rRes)
@@ -340,20 +340,14 @@ if __name__ == "__main__":
     tetStrip=np.reshape(tetMesh,n_particles)
     fiStrip=np.reshape(fiMesh,n_particles)
     #print(rMesh.shape)
-    print(rStrip)
+    #print(rStrip.shape)
     ppx=rStrip*np.sin(tetStrip)*np.cos(fiStrip)
     ppy=rStrip*np.sin(tetStrip)*np.sin(fiStrip)
     ppz=rStrip*np.cos(tetStrip)
     fig0 = plt.figure(0,figsize=plt.figaspect(0.5))
     ax0 = fig0.add_subplot(121, projection='3d')
     ax0.scatter(ppx,ppy,ppz,c='black',alpha=0.9,marker='.',s=1)
-    print("coords:")
-    print(ppx)
-    print(ppy)
-    print(ppz)
-    np.savetxt('x.out', ppx, delimiter=',')
-    np.savetxt('y.out', ppy, delimiter=',')
-    np.savetxt('z.out', ppz, delimiter=',')
+    #print(ppx.shape)
     #ppx, ppy, ppz =1e2*np.random.normal(size=[3, n_particles])
     ppm = np.ones(n_particles)
     data = {'particle_position_x': ppx,'particle_position_y': ppy,'particle_position_z': ppz,'particle_mass': ppm}

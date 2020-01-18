@@ -73,7 +73,7 @@ class EllipsoidShell:
                 pNew[i]+=point[j]*self.orientation[j,i] # each eig vec is [:,i] comp
         #for i in range(0,3):
         #    t+=(pNew[i]/(self.axis[i]))**2.
-        t=np.sqrt(pNew[0]**2.+(pNew[1]/self.b_a)**2.+(pNew[2]**2./self.c_a)**2.)
+        t=np.sqrt(pNew[0]**2.+(pNew[1]/self.b_a)**2.+(pNew[2]/self.c_a)**2.)
         #print(t)
         if (t<=Rout and t>=Rin):
             return True
@@ -95,8 +95,8 @@ class EllipsoidShell:
                         s+=point[i]*point[j]
                         c+=1
                 #Mtot=c*m
-                if c>1:
-                    shape[i][j]=s/(c-1)
+                if c>0:
+                    shape[i][j]=s/c
                 print("particle count for %g<R<%g=%d"%(Rin,Rout,c))
         return shape
 #def GetShellShape(self,sTen,)

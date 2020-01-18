@@ -5,3 +5,4 @@ splash.defaults
 *.ascii
 *.particles
 *.png
+*.out
