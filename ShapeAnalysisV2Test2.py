@@ -89,19 +89,21 @@ class EllipsoidShell:
         c=0
         shape=[[0,0,0],[0,0,0],[0,0,0]]#np.array([[0,0,0,],[0,0,0,],[0,0,0]])
         s=0
-        for i in range(0,3):
-            for j in range(0,3):
-                c=s=0
+
                 print("s[%d,%d]"%(i,j))
-                for point in coords:
-                    #print("point before if:")
-                    #print(point)
-                    if(self.IsInside(point,Rin,Rout)):
-                        s+=point[i]*point[j]
+        for point in coords:
+            if(self.IsInside(point,Rin,Rout)):
+                for i in range(0,3):
+                    for j in range(0,3):
+                        c=s=0
+                        #print("point before if:")
+                        #print(point)
+                        #
+                        shape[i][j]+=point[i]*point[j]
                         c+=1
                 #Mtot=c*m
                 if c>1:
-                    shape[i][j]=s/(c-1)
+                    shape/=(c-1)
                 print("particle count for %g<R<%g=%d"%(Rin,Rout,c))
         return shape
 #def GetShellShape(self,sTen,)

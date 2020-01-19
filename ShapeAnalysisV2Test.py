@@ -62,7 +62,7 @@ class EllipsoidShell:
         else:
             bIndex=3-aIndex-cIndex # sum of indexes is always 3
             self.axis=np.array([axis[aIndex],axis[bIndex],axis[cIndex]])#.sort()
-            self.orientation=np.array([orientation[:,aIndex],orientation[:,bIndex],orientation[:,cIndex]])
+            self.orientation=(np.array([orientation[:,aIndex],orientation[:,bIndex],orientation[:,cIndex]])).T
         print(self.orientation)
         self.Rin=Rin
         self.Rout=Rout
@@ -101,7 +101,7 @@ class EllipsoidShell:
                         c+=1
                 #Mtot=c*m
                 if c>0:
-                    shape[i][j]=s/(c)
+                    shape[i][j]=s/c
                 print("particle count for %g<R<%g=%d"%(Rin,Rout,c))
         return shape
 #def GetShellShape(self,sTen,)
