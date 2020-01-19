@@ -85,7 +85,7 @@ class EllipsoidShell:
         shape=[[1,0,0],[0,1,0],[0,0,1]]#np.array([[0,0,0,],[0,0,0,],[0,0,0]])
         s=0
         for i in range(0,3):
-            for j in range(0,3):
+            for j in range(0,3): #it is symmetric and we can do range(i,3) to get it faster and later s.T+s and s[ii]/=2
                 c=s=0
                 print("s[%d,%d]"%(i,j))
                 for point in coords:
