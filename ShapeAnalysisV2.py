@@ -47,9 +47,9 @@ class MomentShape:
         self.a[i]=ellipsoid.axis[0]
         self.b[i]=ellipsoid.axis[1]
         self.c[i]=ellipsoid.axis[2]
-        self.A[i]=ellipsoid.orientation[0]
-        self.B[i]=ellipsoid.orientation[1]
-        self.C[i]=ellipsoid.orientation[2]
+        self.A[i]=ellipsoid.orientation[:,0]
+        self.B[i]=ellipsoid.orientation[:,1]
+        self.C[i]=ellipsoid.orientation[:,2]
         self.b_a[i]=ellipsoid.b_a
         self.c_a[i]=ellipsoid.c_a
         self.T[i]=(ellipsoid.axis[0]**2.-ellipsoid.axis[1]**2.)/(ellipsoid.axis[0]**2.-ellipsoid.axis[2]**2.)
