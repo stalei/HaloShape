@@ -5,7 +5,6 @@
 #(at your option) any later version.
 #You should have received a copy of the GNU General Public License
 #along with this program.  If not, see <http://www.gnu.org/licenses/>.
-# the main differnce in V2 is the COM instead of the center coordinates from rockstar
 
 from __future__ import division
 import yt
@@ -30,14 +29,15 @@ from numpy import linalg as LA
 from operator import mul
 from functools import reduce
 import matplotlib.pyplot as plt
-from yt.units import parsec, Msun, Mpc, cm
-from mpl_toolkits.mplot3d import Axes3D
 
 class MomentShape:
     def __init__(self,Rv,NBins):
         self.a=[0.]*NBins
         self.b=[0.]*NBins
         self.c=[0.]*NBins
+        self.A=[0.,0.,0.]*NBins
+        self.B=[0.,0.,0.]*NBins
+        self.C=[0.,0.,0.]*NBins
         self.b_a=[0.]*NBins
         self.c_a=[0.]*NBins
         self.T=[0.]*NBins
@@ -47,6 +47,9 @@ class MomentShape:
         self.a[i]=ellipsoid.axis[0]
         self.b[i]=ellipsoid.axis[1]
         self.c[i]=ellipsoid.axis[2]
+        self.A[i]=ellipsoid.orientation[0]
+        self.B[i]=ellipsoid.orientation[1]
+        self.C[i]=ellipsoid.orientation[2]
         self.b_a[i]=ellipsoid.b_a
         self.c_a[i]=ellipsoid.c_a
         self.T[i]=(ellipsoid.axis[0]**2.-ellipsoid.axis[1]**2.)/(ellipsoid.axis[0]**2.-ellipsoid.axis[2]**2.)
@@ -76,8 +79,6 @@ class EllipsoidShell:
                 pNew[i]+=point[j]*self.orientation[j,i] # each eig vec is [:,i] comp
         #for i in range(0,3):
         #    t+=(pNew[i]/(self.axis[i]))**2.
-        #print("point, before-after projection")
-        #print(point,pNew)
         t=np.sqrt(pNew[0]**2.+(pNew[1]/self.b_a)**2.+(pNew[2]/self.c_a)**2.)
         #print(t)
         if (t<=Rout and t>=Rin):
@@ -87,15 +88,15 @@ class EllipsoidShell:
     def MomentTensor(self,coords,Rin,Rout):
         i=j=0
         c=0
-        shape=[[0,0,0],[0,0,0],[0,0,0]]#np.array([[0,0,0,],[0,0,0,],[0,0,0]])
+        shape=[[1,0,0],[0,1,0],[0,0,1]]#np.array([[0,0,0,],[0,0,0,],[0,0,0]])
         s=0
         for i in range(0,3):
-            for j in range(0,3):
+            for j in range(0,3): #it is symmetric and we can do range(i,3) to get it faster and later s.T+s and s[ii]/=2
                 c=s=0
                 print("s[%d,%d]"%(i,j))
                 for point in coords:
                     #print("point before if:")
-                    print(point)
+                    #print(point)
                     if(self.IsInside(point,Rin,Rout)):
                         s+=point[i]*point[j]
                         c+=1
@@ -210,15 +211,8 @@ class Halo:
             return coordsHalo
         else:
             ad = snap.all_data()
-            xp=ad[("all","particle_position_x")]
-            yp=ad[("all","particle_position_y")]
-            zp=ad[("all","particle_position_z")]
-            print("this is x:")
-            print(xp)
-            coordsArray=np.array((xp,yp,zp))
-            coordinatesDM =coordsArray.T# we need to reshape
-            #coordinatesDM = ad[("Halo","Coordinates")]
-            #IDsDM = ad[("Halo","ParticleIDs")]
+            coordinatesDM = ad[("Halo","Coordinates")]
+            IDsDM = ad[("Halo","ParticleIDs")]
             hid =h.id# halo.quantities['particle_identifier']
             #dds = halo.halo_catalog.data_ds
             #center = dds.arr([halo.quantities["particle_position_%s" % axis] \
@@ -226,7 +220,7 @@ class Halo:
             c2=r2=0
             center =h.pos# dds.arr([halo.quantities["particle_position_%s" % axis] \
             Rcut=1.2*h.Rv
-            coordsDM=np.array(coordinatesDM)#.v)
+            coordsDM=np.array(coordinatesDM.v)
             for i in range(0,3):
                 #print(coordsDM[:,i])
                 #print(center[i])
@@ -238,11 +232,10 @@ class Halo:
                 r2+=(coordsDM[:,i])**2.
                 #c2+=(center[i])**2.
             r=np.sqrt(r2)
-            print("r in extract:")
-            print(r)
+            #print(r)
             #coords=coordinatesDM[np.abs(r-np.sqrt(c2)<Rvir)]
             coordsVir=coordsDM[r<Rcut]
-            #IDsDmVir=IDsDM[r<Rcut]
+            IDsDmVir=IDsDM[r<Rcut]
             return coordsVir
     def ExtractShape(self,coords,NBins,NIteration):
         HShape=MomentShape(self.Rv,NBins)#define an empty shape object
@@ -278,7 +271,6 @@ class Halo:
                 v=reduce(mul,axisNew)
                 norm=(v0/v)**(1./3.)
                 axisNormalized=[ax*norm for ax in axisNew]
-                print("axis, axisNormalized:")
                 print(axisNew)
                 print(axisNormalized)
                 ellshellNew=EllipsoidShell(axisNormalized,orientationNew,Rin,Rout)
@@ -308,103 +300,67 @@ class Halo:
 
 
 
-    #how to run: python ShapeAnalysis.py  bin_number iteration
-    #example: $python ShapeAnalysisV2Test.py  5 30
+    #how to run: python ShapeAnalysis.py snapshot_file halo_catalog particles_list check_contamination extract_shape bin_number iteration
+    #example: $python ShapeAnalysisV1.py snap_264 halos_0.0.ascii halos_0.0.particles 1.4e12 1.1e12   1 1 5 3
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    #parser.add_argument("snap", type=str)
-    #parser.add_argument("halo",type=str)
-    #parser.add_argument("PList",type=str)
-    #parser.add_argument("UMass",type=float)
-    #parser.add_argument("LMass",type=float)
-    #parser.add_argument("contamination", type=int)
-    #parser.add_argument("extractShape", type=int)
+    parser.add_argument("snap", type=str)
+    parser.add_argument("halo",type=str)
+    parser.add_argument("PList",type=str)
+    parser.add_argument("UMass",type=float)
+    parser.add_argument("LMass",type=float)
+    parser.add_argument("contamination", type=int)
+    parser.add_argument("extractShape", type=int)
     parser.add_argument("NBins", type=int)
     parser.add_argument("NIteration", type=int)
     #parser.add_argument("excludeSubhalos", type=int)
     args = parser.parse_args()
     #read the snapshot file
-    # in this test we create an arbitrary data instead of using an output file
-    rRes=4
-    tetRes=25
-    fiRes=12
-    n_particles = rRes*tetRes*fiRes
-    Rvirial=0.2#200
-    rpp=np.linspace(0.001,Rvirial-0.001,rRes)
-    tetpp=np.linspace(-np.pi,np.pi,tetRes)
-    fipp=np.linspace(0,2.*np.pi,fiRes)
-    rMesh,tetMesh,fiMesh=np.meshgrid(rpp,tetpp,fipp)
-    #rStrip=np.squeeze(np.array(rMesh))  x
-    #rStrip=rMesh[:] x
-    rStrip=np.reshape(rMesh,n_particles)
-    tetStrip=np.reshape(tetMesh,n_particles)
-    fiStrip=np.reshape(fiMesh,n_particles)
-    #print(rMesh.shape)
-    print(rStrip)
-    ppx=rStrip*np.sin(tetStrip)*np.cos(fiStrip)
-    ppy=rStrip*np.sin(tetStrip)*np.sin(fiStrip)
-    ppz=rStrip*np.cos(tetStrip)
-    fig0 = plt.figure(0,figsize=plt.figaspect(0.5))
-    ax0 = fig0.add_subplot(121, projection='3d')
-    ax0.scatter(ppx,ppy,ppz,c='black',alpha=0.9,marker='.',s=1)
-    print("coords:")
-    print(ppx)
-    print(ppy)
-    print(ppz)
-    np.savetxt('x.out', ppx, delimiter=',')
-    np.savetxt('y.out', ppy, delimiter=',')
-    np.savetxt('z.out', ppz, delimiter=',')
-    #ppx, ppy, ppz =1e2*np.random.normal(size=[3, n_particles])
-    ppm = np.ones(n_particles)
-    data = {'particle_position_x': ppx,'particle_position_y': ppy,'particle_position_z': ppz,'particle_mass': ppm}
-    bbox = 1.1*np.array([[min(ppx), max(ppx)], [min(ppy), max(ppy)], [min(ppz), max(ppz)]])
-    #snap = yt.load_particles(data, length_unit=Mpc, mass_unit=Msun, n_ref=256, bbox=bbox)
-    snap = yt.load_particles(data, length_unit=cm, mass_unit=Msun, n_ref=256, bbox=bbox)
-    #snap = yt.load(args.snap)#, unit_base=unit_base1)#,unit_system='galactic')
-    #if snap is None:
-    #    print ("Error, sorry, I couldn't read the snapshot.!")
-    #    sys.exit(1)
-    halos=0#np.genfromtxt(args.halo, skip_header=18)
-    #if halos is None:
-    #    print ("Error, sorry, I couldn't read the halo binary file.!")
-    #    sys.exit(1)
-    plist=0#np.genfromtxt(args.PList, skip_header=18,comments='#')
-    #if plist is None:
-    #    print ("Error, sorry, I couldn't read the halo binary file.!")
-    #    sys.exit(1)
-    #UpperMass=args.UMass
-    #LowerMass=args.LMass
+    snap = yt.load(args.snap)#, unit_base=unit_base1)#,unit_system='galactic')
+    if snap is None:
+        print ("Error, sorry, I couldn't read the snapshot.!")
+        sys.exit(1)
+    halos=np.genfromtxt(args.halo, skip_header=18)
+    if halos is None:
+        print ("Error, sorry, I couldn't read the halo binary file.!")
+        sys.exit(1)
+    plist=np.genfromtxt(args.PList, skip_header=18,comments='#')
+    if plist is None:
+        print ("Error, sorry, I couldn't read the halo binary file.!")
+        sys.exit(1)
+    UpperMass=args.UMass
+    LowerMass=args.LMass
     #read the halo info
-    #pnumh=np.array(halos[:,1])
-    #MvH=np.array(halos[:,2])
-    #RvH=np.array(halos[:,4])# in kpc
-    #xH=np.array(halos[:,8])
-    #yH=np.array(halos[:,9])
-    #zH=np.array(halos[:,10])
-    #IdH=np.array(halos[:,0])
-    ph=n_particles#pnumh[(MvH>LowerMass) & (MvH<UpperMass)]
-    Idh=0#IdH[(MvH>LowerMass) & (MvH<UpperMass)]
-    Mvh=1.2e12#MvH[(MvH>LowerMass) & (MvH<UpperMass)]
-    xh=0#xH[(MvH>LowerMass) & (MvH<UpperMass)]
-    yh=0#yH[(MvH>LowerMass) & (MvH<UpperMass)]
-    zh=0#zH[(MvH>LowerMass) & (MvH<UpperMass)]
-    Rvh=Rvirial#RvH[(MvH>LowerMass) & (MvH<UpperMass)]
-    #Rvh/=1000 # convert from kpc to Mpc
+    pnumh=np.array(halos[:,1])
+    MvH=np.array(halos[:,2])
+    RvH=np.array(halos[:,4])# in kpc
+    xH=np.array(halos[:,8])
+    yH=np.array(halos[:,9])
+    zH=np.array(halos[:,10])
+    IdH=np.array(halos[:,0])
+    ph=pnumh[(MvH>LowerMass) & (MvH<UpperMass)]
+    Idh=IdH[(MvH>LowerMass) & (MvH<UpperMass)]
+    Mvh=MvH[(MvH>LowerMass) & (MvH<UpperMass)]
+    xh=xH[(MvH>LowerMass) & (MvH<UpperMass)]
+    yh=yH[(MvH>LowerMass) & (MvH<UpperMass)]
+    zh=zH[(MvH>LowerMass) & (MvH<UpperMass)]
+    Rvh=RvH[(MvH>LowerMass) & (MvH<UpperMass)]
+    Rvh/=1000 # convert from kpc to Mpc
     halo=[]#*len(MvH)
-    #print("found %d halos in the given interval"%len(Mvh))
-    if True: #A #we already have a halo
-    #    for i in range(0,len(Mvh)):
-    #        halo.append(Halo(xh[i],yh[i],zh[i],Rvh[i],Mvh[i],ph[i],Idh[i]))
-        halo.append(Halo(xh,yh,zh,Rvh,Mvh,ph,Idh))
-        #if(args.contamination == 1):
-        #    print("checking for contamination")
-        #    for h in halo:
-        #        h.contamination=h.IsContaminated(snap)
+    print("found %d halos in the given interval"%len(Mvh))
+    if len(Mvh)>0: #A
+
+        for i in range(0,len(Mvh)):
+            halo.append(Halo(xh[i],yh[i],zh[i],Rvh[i],Mvh[i],ph[i],Idh[i]))
+        if(args.contamination == 1):
+            print("checking for contamination")
+            for h in halo:
+                h.contamination=h.IsContaminated(snap)
         print("ID ---- Mvirial ---- Rvirial ---- # of Ps ---- Contamination ---- [#p Vir ---- #p No Sub]")
         print("################################################################################")
-        #if(args.extractShape==0):
-        #    for h in halo:
-        #        print("%d -- %g -- %f -- %d -- %d"%(h.id,h.Mv,h.Rv,h.pnum,h.contamination))
+        if(args.extractShape==0):
+            for h in halo:
+                print("%d -- %g -- %f -- %d -- %d"%(h.id,h.Mv,h.Rv,h.pnum,h.contamination))
         #target=input("please select a halo id(-1 to quit):")
         #if target==-1:
         #    sys.exit(1)
@@ -423,29 +379,28 @@ if __name__ == "__main__":
         ax2.title.set_text('c/a')
         ax3.title.set_text('T')
         ax4.title.set_text('c/a - b/a')
-        if(True): # extract shape is already true and I don't want to change the structure
+        if(args.extractShape==1):
             #print("let's extract the shape")
             for h in halo:
                 #print("%d -- %g -- %f -- %d -- %d -- %d -- %d"%(h.id,h.Mv,h.Rv,h.pnum,h.contamination,len(PcoordsSub),len(PcoordsNoSub)))
                 #extract coordinates
                 #
                 PcoordsSub=h.ExtractParticles(snap,halos,plist,False)
-                ax00 = fig0.add_subplot(122, projection='3d')
-                ax00.scatter(PcoordsSub[:,0],PcoordsSub[:,1],PcoordsSub[:,2],c='black',alpha=0.9,marker='.',s=1)
-                #PcoordsNoSub=h.ExtractParticles(snap,halos,plist,True)
+                PcoordsNoSub=h.ExtractParticles(snap,halos,plist,True)
                 Shape=h.ExtractShape(PcoordsSub,args.NBins,args.NIteration)
-                #ShapeNoSub=h.ExtractShape(PcoordsNoSub,args.NBins,args.NIteration)
+                ShapeNoSub=h.ExtractShape(PcoordsNoSub,args.NBins,args.NIteration)
                 #print(Shape.R)
                 #print(Shape.b_a)
                 ax1.plot(Shape.R,Shape.b_a,linestyle='-',label=str(h.id))
-                #ax1.plot(ShapeNoSub.R,ShapeNoSub.b_a,linestyle='-.',label="NoSub"+str(h.id))
+                ax1.plot(ShapeNoSub.R,ShapeNoSub.b_a,linestyle='-.',label="NoSub"+str(h.id))
                 ax2.plot(Shape.R,Shape.c_a,linestyle='-',label=str(h.id))
-                #ax2.plot(ShapeNoSub.R,ShapeNoSub.c_a,linestyle='-.',label="NoSub"+str(h.id))
+                ax2.plot(ShapeNoSub.R,ShapeNoSub.c_a,linestyle='-.',label="NoSub"+str(h.id))
                 ax3.plot(Shape.R,Shape.T,linestyle='-',label=str(h.id))
-                #ax3.plot(ShapeNoSub.R,ShapeNoSub.T,linestyle='-.',label="NoSub"+str(h.id))
+                ax3.plot(ShapeNoSub.R,ShapeNoSub.T,linestyle='-.',label="NoSub"+str(h.id))
                 ax4.plot(Shape.c_a,Shape.b_a,'bo',label=str(h.id))
-                #ax4.plot(ShapeNoSub.c_a,ShapeNoSub.b_a,'ro',label="NoSub"+str(h.id))
-                print("%d -- %g -- %f -- %d -- %d -- %d -- %d"%(h.id,h.Mv,h.Rv,h.pnum,h.contamination,len(PcoordsSub),0))
+                ax4.plot(ShapeNoSub.c_a,ShapeNoSub.b_a,'ro',label="NoSub"+str(h.id))
+                print(Shape.A)
+                print("%d -- %g -- %f -- %d -- %d -- %d -- %d"%(h.id,h.Mv,h.Rv,h.pnum,h.contamination,len(PcoordsSub),len(PcoordsNoSub)))
         print("################################################################################")
     else: #A
         print("No halo found in the given range!")
