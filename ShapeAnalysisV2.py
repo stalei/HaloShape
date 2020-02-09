@@ -38,6 +38,9 @@ class MomentShape:
         self.A=[0.,0.,0.]*NBins
         self.B=[0.,0.,0.]*NBins
         self.C=[0.,0.,0.]*NBins
+        self.Aunit=[0.,0.,0.]*NBins
+        self.Bunit=[0.,0.,0.]*NBins
+        self.Cunit=[0.,0.,0.]*NBins
         self.b_a=[0.]*NBins
         self.c_a=[0.]*NBins
         self.T=[0.]*NBins
@@ -50,6 +53,9 @@ class MomentShape:
         self.A[i]=ellipsoid.orientation[:,0]
         self.B[i]=ellipsoid.orientation[:,1]
         self.C[i]=ellipsoid.orientation[:,2]
+        self.Aunit[i] = self.A[i] / (self.A[i]**2).sum()**0.5
+        self.Bunit[i] = self.B[i] / (self.B[i]**2).sum()**0.5
+        self.Cunit[i] = self.C[i] / (self.C[i]**2).sum()**0.5
         self.b_a[i]=ellipsoid.b_a
         self.c_a[i]=ellipsoid.c_a
         self.T[i]=(ellipsoid.axis[0]**2.-ellipsoid.axis[1]**2.)/(ellipsoid.axis[0]**2.-ellipsoid.axis[2]**2.)
@@ -135,17 +141,23 @@ def CompareShapes(ell1,ell2):
 
 
 class Halo:
-    def __init__(self,x,y,z,R,M,pnum,id):
+    def __init__(self,x,y,z,R,M,pnum,id,jx,jy,jz):
         center=np.zeros(3)
+        am=np.zeros(3)
         center[0]=x
         center[1]=y
         center[2]=z
+        am[0]=jx
+        am[1]=jy
+        am[2]=jz
         self.pos=center
         self.Rv=R
         self.Mv=M
         self.pnum=pnum
         self.id=id
         self.contamination=0
+        self.AngMom=am
+        self.AngMomUnit=am/np.sqrt(jx**2.+jy**2.+jz**2.)
     #look for low resolution particle contamination
     def IsContaminated(self,ds):#snap):
         center =self.pos# dds.arr([halo.quantities["particle_position_%s" % axis] \
@@ -357,7 +369,7 @@ if __name__ == "__main__":
     if len(Mvh)>0: #A
 
         for i in range(0,len(Mvh)):
-            halo.append(Halo(xh[i],yh[i],zh[i],Rvh[i],Mvh[i],ph[i],Idh[i]))
+            halo.append(Halo(xh[i],yh[i],zh[i],Rvh[i],Mvh[i],ph[i],Idh[i],Jxh[i],Jyh[i],Jzh[i]))
         if(args.contamination == 1):
             print("checking for contamination")
             for h in halo:
