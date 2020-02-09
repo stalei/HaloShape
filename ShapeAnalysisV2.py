@@ -382,9 +382,17 @@ if __name__ == "__main__":
         ax4 = fig.add_subplot(224)
         ax1.legend(loc=2)
         ax1.title.set_text('b/a')
+        ax1.set_xlabel('R (Mpc)')
+        ax1.set_ylabel('b/a')
         ax2.title.set_text('c/a')
+        ax2.set_xlabel('R (Mpc)')
+        ax2.set_ylabel('c/a')
         ax3.title.set_text('T')
+        ax3.set_xlabel('R (Mpc)')
+        ax3.set_ylabel('T')
         ax4.title.set_text('c/a - b/a')
+        ax4.set_xlabel('b/a')
+        ax4.set_ylabel('c/a')
         if(args.extractShape==1):
             #print("let's extract the shape")
             for h in halo:
