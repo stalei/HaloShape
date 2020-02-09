@@ -338,6 +338,9 @@ if __name__ == "__main__":
     yH=np.array(halos[:,9])
     zH=np.array(halos[:,10])
     IdH=np.array(halos[:,0])
+    JxH=np.array(halos[:,14])
+    JyH=np.array(halos[:,15])
+    JzH=np.array(halos[:,16])
     ph=pnumh[(MvH>LowerMass) & (MvH<UpperMass)]
     Idh=IdH[(MvH>LowerMass) & (MvH<UpperMass)]
     Mvh=MvH[(MvH>LowerMass) & (MvH<UpperMass)]
@@ -345,6 +348,9 @@ if __name__ == "__main__":
     yh=yH[(MvH>LowerMass) & (MvH<UpperMass)]
     zh=zH[(MvH>LowerMass) & (MvH<UpperMass)]
     Rvh=RvH[(MvH>LowerMass) & (MvH<UpperMass)]
+    Jxh=JxH[(MvH>LowerMass) & (MvH<UpperMass)]
+    Jyh=JyH[(MvH>LowerMass) & (MvH<UpperMass)]
+    Jzh=JzH[(MvH>LowerMass) & (MvH<UpperMass)]
     Rvh/=1000 # convert from kpc to Mpc
     halo=[]#*len(MvH)
     print("found %d halos in the given interval"%len(Mvh))
