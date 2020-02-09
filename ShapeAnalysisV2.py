@@ -400,6 +400,8 @@ if __name__ == "__main__":
                 ax4.plot(Shape.c_a,Shape.b_a,'bo',label=str(h.id))
                 ax4.plot(ShapeNoSub.c_a,ShapeNoSub.b_a,'ro',label="NoSub"+str(h.id))
                 print(Shape.A)
+                print(Shape.B)
+                print(Shape.C)
                 print("%d -- %g -- %f -- %d -- %d -- %d -- %d"%(h.id,h.Mv,h.Rv,h.pnum,h.contamination,len(PcoordsSub),len(PcoordsNoSub)))
         print("################################################################################")
     else: #A
