@@ -409,7 +409,6 @@ if __name__ == "__main__":
         fig2=plt.figure(2)
         fig2.suptitle('Orientations')
         ax21=fig2.add_subplot(121)
-        ax21.legend(loc=2)
         ax21.title.set_text('residual')
         ax21.set_xlabel('R (Mpc)')
         ax21.set_ylabel('inner product')
@@ -437,27 +436,53 @@ if __name__ == "__main__":
                 ax3.plot(ShapeNoSub.R,ShapeNoSub.T,linestyle='-.',label="NoSub"+str(h.id))
                 ax4.plot(Shape.c_a,Shape.b_a,'bo',label=str(h.id))
                 ax4.plot(ShapeNoSub.c_a,ShapeNoSub.b_a,'ro',label="NoSub"+str(h.id))
-                #orientation plots
-                InnPro=[0]*args.NBins
-                InnProRes=[0]*args.NBins
+                #orientation plots, I can add these in SetBinShape
+                InnProA=[0]*args.NBins
+                InnProResA=[0]*args.NBins
+                InnProB=[0]*args.NBins
+                InnProResB=[0]*args.NBins
+                InnProC=[0]*args.NBins
+                InnProResC=[0]*args.NBins
                 print(Shape.Aunit)
                 aa0=np.array(Shape.Aunit[0])
+                bb0=np.array(Shape.Bunit[0])
+                cc0=np.array(Shape.Cunit[0])
                 print('this is aa0:')
                 print(aa0)
                 #index=0
                 for index in range(0,args.NBins):
-                    sum=0
-                    sumRes=0
+                    suma=0
+                    sumResa=0
+                    sumb=0
+                    sumResb=0
+                    sumc=0
+                    sumResc=0
                     aa=np.array(Shape.Aunit[index])
+                    bb=np.array(Shape.Bunit[index])
+                    cc=np.array(Shape.Cunit[index])
                     for k in range(0,3):
-                        sum+=aa[k]*h.AngMomUnit[k]
-                        sumRes+=aa[k]*aa0[k]
-                    InnPro[index]=sum
-                    InnProRes[index]=sumRes
+                        suma+=aa[k]*h.AngMomUnit[k]
+                        sumResa+=aa[k]*aa0[k]
+                        sumb+=bb[k]*h.AngMomUnit[k]
+                        sumResb+=bb[k]*bb0[k]
+                        sumc+=cc[k]*h.AngMomUnit[k]
+                        sumResc+=cc[k]*cc0[k]
+                    InnProA[index]=suma
+                    InnProResA[index]=sumResa
+                    InnProB[index]=sumb
+                    InnProResB[index]=sumResb
+                    InnProC[index]=sumc
+                    InnProResC[index]=sumResc
                     #index+=1
-                print(Shape.A)
-                print(InnPro)
-                print(InnProRes)
+                ax21.plot(Shape.R,InnProA,linestyle='-',label="A-"+str(h.id))
+                ax22.plot(Shape.R,InnProResA,linestyle='-',label="A-"+str(h.id))
+                ax21.plot(Shape.R,InnProB,linestyle='-.',label="B-"+str(h.id))
+                ax22.plot(Shape.R,InnProResB,linestyle='-.',label="B-"+str(h.id))
+                ax21.plot(Shape.R,InnProC,linestyle=':',label="C-"+str(h.id))
+                ax22.plot(Shape.R,InnProResC,linestyle=':',label="C-"+str(h.id))
+                #print(Shape.A)
+                #print(InnPro)
+                #print(InnProRes)
                 print("%d -- %g -- %f -- %d -- %d -- %d -- %d"%(h.id,h.Mv,h.Rv,h.pnum,h.contamination,len(PcoordsSub),len(PcoordsNoSub)))
         print("################################################################################")
     else: #A
@@ -467,4 +492,6 @@ if __name__ == "__main__":
     ax2.legend(loc=3)
     ax3.legend(loc=3)
     ax4.legend(loc=4)
+    ax21.legend(loc=2)
+    ax22.legend(loc=4)
     plt.show()
