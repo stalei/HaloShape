@@ -405,6 +405,18 @@ if __name__ == "__main__":
         ax4.title.set_text('c/a - b/a')
         ax4.set_xlabel('b/a')
         ax4.set_ylabel('c/a')
+        #2nd fig
+        fig2=plt.figure(2)
+        fig2.suptitle('Orientations')
+        ax21=fig2.add_subplot(121)
+        ax21.legend(loc=2)
+        ax21.title.set_text('residual')
+        ax21.set_xlabel('R (Mpc)')
+        ax21.set_ylabel('inner product')
+        ax22=fig2.add_subplot(122)
+        ax22.title.set_text('halo angular momentum')
+        ax22.set_xlabel('R (Mpc)')
+        ax22.set_ylabel('inner product')
         if(args.extractShape==1):
             #print("let's extract the shape")
             for h in halo:
@@ -425,9 +437,27 @@ if __name__ == "__main__":
                 ax3.plot(ShapeNoSub.R,ShapeNoSub.T,linestyle='-.',label="NoSub"+str(h.id))
                 ax4.plot(Shape.c_a,Shape.b_a,'bo',label=str(h.id))
                 ax4.plot(ShapeNoSub.c_a,ShapeNoSub.b_a,'ro',label="NoSub"+str(h.id))
+                #orientation plots
+                InnPro=[0]*args.NBins
+                InnProRes=[0]*args.NBins
+                print(Shape.Aunit)
+                aa0=np.array(Shape.Aunit[0])
+                print('this is aa0:')
+                print(aa0)
+                #index=0
+                for index in range(0,args.NBins):
+                    sum=0
+                    sumRes=0
+                    aa=np.array(Shape.Aunit[index])
+                    for k in range(0,3):
+                        sum+=aa[k]*h.AngMomUnit[k]
+                        sumRes+=aa[k]*aa0[k]
+                    InnPro[index]=sum
+                    InnProRes[index]=sumRes
+                    #index+=1
                 print(Shape.A)
-                print(Shape.B)
-                print(Shape.C)
+                print(InnPro)
+                print(InnProRes)
                 print("%d -- %g -- %f -- %d -- %d -- %d -- %d"%(h.id,h.Mv,h.Rv,h.pnum,h.contamination,len(PcoordsSub),len(PcoordsNoSub)))
         print("################################################################################")
     else: #A
