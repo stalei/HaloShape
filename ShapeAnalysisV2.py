@@ -30,6 +30,8 @@ from operator import mul
 from functools import reduce
 import matplotlib.pyplot as plt
 
+import csv
+
 class MomentShape:
     def __init__(self,Rv,NBins):
         self.a=[0.]*NBins
@@ -480,6 +482,21 @@ if __name__ == "__main__":
                 ax22.plot(Shape.R,InnProResB,linestyle='-.',label="B-"+str(h.id))
                 ax21.plot(Shape.R,InnProC,linestyle=':',label="C-"+str(h.id))
                 ax22.plot(Shape.R,InnProResC,linestyle=':',label="C-"+str(h.id))
+                # now let's save the file
+                #first we need a header with the halo info
+                #
+                header=str(h.id)+str(h.AngMom)+str(h.Mv)+str(h.Rv)
+                #2nd we need to put all useful info in a matrix and write in a csv file
+                OutputData=(np.array([Shape.R,Shape.b_a,Shape.c_a,Shape.T,Shape.A,Shape.B,Shape.C,InnProA,InnProResA,InnProB,InnProResB,InnProC,InnProResC])).T
+                fName=str(h.id)+".csv"
+                with open(fName, 'w') as f:
+                    w = csv.writer(f, delimiter=';')
+                    w.writerow(header)
+                    #for row in OutputData:#zip(l1, l2, (str(x)+'%' for x in l3)):
+                    #    w.writerow(row)
+                    for row in range(0,args.NBins):
+                        Record=np.array([Shape.R[row],Shape.b_a[row],Shape.c_a[row],Shape.T[row],InnProA[row],InnProResA[row],InnProB[row],InnProResB[row],InnProC[row],InnProResC[row]])
+                        w.writerow(Record)
                 #print(Shape.A)
                 #print(InnPro)
                 #print(InnProRes)

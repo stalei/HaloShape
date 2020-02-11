@@ -6,3 +6,4 @@ splash.defaults
 *.particles
 *.png
 *.out
+*.csv
