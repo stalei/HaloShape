@@ -394,7 +394,7 @@ if __name__ == "__main__":
         ax2 = fig.add_subplot(222)
         ax3 = fig.add_subplot(223)
         ax4 = fig.add_subplot(224)
-        ax1.legend(loc=2)
+        #ax1.legend(loc=2)
         ax1.title.set_text('b/a')
         ax1.set_xlabel('R (Mpc)')
         ax1.set_ylabel('b/a')
@@ -411,11 +411,11 @@ if __name__ == "__main__":
         fig2=plt.figure(2)
         fig2.suptitle('Orientations')
         ax21=fig2.add_subplot(121)
-        ax21.title.set_text('residual')
+        ax21.title.set_text('halo angular momentum')
         ax21.set_xlabel('R (Mpc)')
         ax21.set_ylabel('inner product')
         ax22=fig2.add_subplot(122)
-        ax22.title.set_text('halo angular momentum')
+        ax22.title.set_text('residual')
         ax22.set_xlabel('R (Mpc)')
         ax22.set_ylabel('inner product')
         if(args.extractShape==1):
@@ -485,17 +485,22 @@ if __name__ == "__main__":
                 # now let's save the file
                 #first we need a header with the halo info
                 #
-                header=str(h.id)+str(h.AngMom)+str(h.Mv)+str(h.Rv)
+                header1=["#","HaloID","HaloAngularMomentum","Mv","Rv"]
+                header2=["#",str(h.id),str(h.AngMom),str("{:.2e}".format(h.Mv)),str(h.Rv)]
+                header3=["#","BinNumber","R","b/a","c/a","T","A.J","A.A[0]","B.J","B.B[0]","C.J","C.C[0]","A","B","C"]
                 #2nd we need to put all useful info in a matrix and write in a csv file
-                OutputData=(np.array([Shape.R,Shape.b_a,Shape.c_a,Shape.T,Shape.A,Shape.B,Shape.C,InnProA,InnProResA,InnProB,InnProResB,InnProC,InnProResC])).T
+                #OutputData=(np.array([Shape.R,Shape.b_a,Shape.c_a,Shape.T,Shape.A,Shape.B,Shape.C,InnProA,InnProResA,InnProB,InnProResB,InnProC,InnProResC])).T
                 fName=str(h.id)+".csv"
                 with open(fName, 'w') as f:
-                    w = csv.writer(f, delimiter=';')
-                    w.writerow(header)
+                    w = csv.writer(f, delimiter=' ')
+                    w.writerow(header1)
+                    w.writerow(header2)
+                    w.writerow(header3)
                     #for row in OutputData:#zip(l1, l2, (str(x)+'%' for x in l3)):
                     #    w.writerow(row)
                     for row in range(0,args.NBins):
-                        Record=np.array([Shape.R[row],Shape.b_a[row],Shape.c_a[row],Shape.T[row],InnProA[row],InnProResA[row],InnProB[row],InnProResB[row],InnProC[row],InnProResC[row]])
+                        Record=np.array([row,Shape.R[row],Shape.b_a[row],Shape.c_a[row],Shape.T[row],InnProA[row],
+                        InnProResA[row],InnProB[row],InnProResB[row],InnProC[row],InnProResC[row],Shape.A[row],Shape.B[row],Shape.C[row]])
                         w.writerow(Record)
                 #print(Shape.A)
                 #print(InnPro)
