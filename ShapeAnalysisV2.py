@@ -122,7 +122,7 @@ def CompareShapes(ell1,ell2):
     dRatio=np.array([0,0])
     #we have to sort axis before we compare them
     for i in range(1,3):
-        if(ell1.axis[0] !=0):
+        if(ell1.axis[0] !=0 and not(np.isnan(ell1.axis[i]/ell1.axis[0])/(ell2.axis[i]/ell2.axis[0]))):
             dRatio[i-1]=np.abs((ell1.axis[i]/ell1.axis[0])/(ell2.axis[i]/ell2.axis[0]))
         #dRatio[i-1]=0
     #dori=np.abs(np.divide(ell1.orientations/ell2.orientations))
@@ -285,13 +285,18 @@ class Halo:
                 v=reduce(mul,axisNew)
                 norm=(v0/v)**(1./3.)
                 axisNormalized=[ax*norm for ax in axisNew]
+                print(v)
+                print(norm)
                 print(axisNew)
                 print(axisNormalized)
                 ellshellNew=EllipsoidShell(axisNormalized,orientationNew,Rin,Rout)
-                if CompareShapes(ellshell,ellshellNew):
-                    match+=1
-                    print("we converged in shape for %f"%Rs[i])
-                    convergence=True
+                if not(np.isnan(norm)):# !=np.NaN:
+                    if CompareShapes(ellshell,ellshellNew):
+                        match+=1
+                        print("we converged in shape for %f"%Rs[i])
+                        convergence=True
+                    else:
+                        match=0
                 else:
                     match=0
                 iteration+=1
