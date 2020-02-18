@@ -32,6 +32,8 @@ import matplotlib.pyplot as plt
 
 import csv
 
+plt.rcParams["font.size"] =12
+
 class MomentShape:
     def __init__(self,Rv,NBins):
         self.a=[0.]*NBins
@@ -492,7 +494,7 @@ if __name__ == "__main__":
                 #
                 header1=["#","HaloID","HaloAngularMomentum","Mv","Rv"]
                 header2=["#",str(h.id),str(h.AngMom),str("{:.2e}".format(h.Mv)),str(h.Rv)]
-                header3=["#","BinNumber","R","b/a","c/a","T","A.J","A.A[0]","B.J","B.B[0]","C.J","C.C[0]","A","B","C"]
+                header3=["#","BinNumber","R","b/a","c/a","T","b/a_NoSub","c/a_NoSub","T_NoSub","A.J","A.A[0]","B.J","B.B[0]","C.J","C.C[0]"]
                 #2nd we need to put all useful info in a matrix and write in a csv file
                 #OutputData=(np.array([Shape.R,Shape.b_a,Shape.c_a,Shape.T,Shape.A,Shape.B,Shape.C,InnProA,InnProResA,InnProB,InnProResB,InnProC,InnProResC])).T
                 fName=str(h.id)+".csv"
@@ -504,8 +506,10 @@ if __name__ == "__main__":
                     #for row in OutputData:#zip(l1, l2, (str(x)+'%' for x in l3)):
                     #    w.writerow(row)
                     for row in range(0,args.NBins):
-                        Record=np.array([row,Shape.R[row],Shape.b_a[row],Shape.c_a[row],Shape.T[row],InnProA[row],
-                        InnProResA[row],InnProB[row],InnProResB[row],InnProC[row],InnProResC[row],Shape.A[row],Shape.B[row],Shape.C[row]])
+                        #Record=np.array([row,Shape.R[row],Shape.b_a[row],Shape.c_a[row],Shape.T[row],InnProA[row],
+                        #InnProResA[row],InnProB[row],InnProResB[row],InnProC[row],InnProResC[row],Shape.A[row],Shape.B[row],Shape.C[row]])
+                        Record=np.array([row,Shape.R[row],Shape.b_a[row],Shape.c_a[row],Shape.T[row],ShapeNoSub.b_a[row],ShapeNoSub.c_a[row],
+                        ShapeNoSub.T[row],np.abs(InnProA[row]),np.abs(InnProResA[row]),np.abs(InnProB[row]),np.abs(InnProResB[row]),np.abs(InnProC[row]),np.abs(InnProResC[row])])
                         w.writerow(Record)
                 #print(Shape.A)
                 #print(InnPro)
