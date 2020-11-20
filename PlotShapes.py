@@ -10,18 +10,27 @@ import matplotlib.pyplot as plt
 import numpy as np
 plt.rcParams["font.size"] =12
 #files
-f1='/media/shahram/SD/32251/g3z32251_377.0.csv'
-f2='/media/shahram/SD/32251/c3z32251_426.0.csv'
+#redshift 0
+f1='/media/shahram/SD/Sample100Mpc/32251/g3z32251_377.0.csv'
+f2='/media/shahram/SD/Sample100Mpc/32251/c3z32251_426.0.csv'
 
-f3='/media/shahram/SD/717/g3z717_2023.0.csv'
-f4='/media/shahram/SD/717/c3z717_2053.0.csv'
+f3='/media/shahram/SD/Sample100Mpc/717/g3z717_2023.0.csv'
+f4='/media/shahram/SD/Sample100Mpc/717/c3z717_2002.0.csv'
 
-f5='/media/shahram/SD/19880/g3z19880_976.0.csv'
-f6='/media/shahram/SD/19880/c3z19880_932.0.csv'
+f5='/media/shahram/SD/Sample100Mpc/19880/g3z19880_976.0.csv'
+f6='/media/shahram/SD/Sample100Mpc/19880/c3z19880_932.0.csv'
+#redshift 3
+f7='/media/shahram/SD/Sample100Mpc/717/z3/2888.0-G717-z3-2.csv'
+f8='/media/shahram/SD/Sample100Mpc/717/z3/2899.0-C717z3.csv'
 
+f9='/media/shahram/SD/Sample100Mpc/19880/z3/2658.0-G19880z3.csv'
+f10='/media/shahram/SD/Sample100Mpc/19880/z3/2679.0-C19880z3.csv'
+
+f11='/media/shahram/SD/Sample100Mpc/32251/z3/873.0-G32251z3.csv'
+f12='/media/shahram/SD/Sample100Mpc/32251/z3/852.0-C32251z3.csv'
 #open and plot
 
-with open(f6, newline='') as csvfile:
+with open(f12, newline='') as csvfile:
     reader = csv.reader(csvfile, delimiter=' ', quotechar='|')
     next(reader)
     next(reader)
@@ -68,7 +77,7 @@ with open(f6, newline='') as csvfile:
     ax11.plot(R,c_a,'b',linestyle='-',label="c/a")#str(h.id))
     ax11.plot(R,b_aNoSub,'r',linestyle='-.',label="b/a-No Subhalo")#str(h.id))
     ax11.plot(R,c_aNoSub,'b',linestyle='-.',label="c/a-No Subhalo")#str(h.id))
-    ax11.legend(loc=4)
+    ax11.legend(loc=1)
     ax12 = fig1.add_subplot(132)
     ax12.set_xlabel('R (kpc)')
     ax12.set_ylabel('Shape-Angular Momentum')
