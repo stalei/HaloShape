@@ -40,19 +40,22 @@ f17='/media/shahram/SD/Sample100Mpc/32251/High5M/z0.62/14003.0-G-30bin.csv'
 f18='/media/shahram/SD/Sample100Mpc/32251/High5M/z0.62/15486.0-C-30bin.csv'
 
 f19='/media/shahram/SD/Sample100Mpc/m12b/z0/6520-m12bGz0.csv'
-f20='/media/shahram/SD/Sample100Mpc/m12f/z0/10226-m12fz0.csv'
+f20='/media/shahram/SD/Sample100Mpc/m12b/z0/4743-m12bCz0.csv'
 
 f21='/media/shahram/SD/Sample100Mpc/32251/High5M/z0.18/10096-32251Gz0.18.csv'
 f22='/media/shahram/SD/Sample100Mpc/32251/High5M/z0.18/11607-32251Cz0.18.csv'
 
+f23='/media/shahram/SD/Sample100Mpc/32251/High5M/z0/9678-32251Gz0.csv'
+f24='/media/shahram/SD/Sample100Mpc/32251/High5M/z0/9575-32251Cz0.csv'
+
 #open and plot
 
-with open(f21, newline='') as csvfile:
+with open(f19, newline='') as csvfile:
     reader = csv.reader(csvfile, delimiter=' ', quotechar='|')
     next(reader)
     next(reader)
     next(reader)
-    size=15 # I have to add a better way to get this number
+    size=30 # I have to add a better way to get this number
     print("Number of bins:%d"%size)
     #declare variables
     R=[0]*size #for all plots
@@ -120,8 +123,8 @@ with open(f21, newline='') as csvfile:
     ax21.scatter(b_a,c_a,marker='o',color='b',label='Gadget')
     #ax21.plot(b_a,b_a,'r',linestyle='-',label="Prolate")#str(h.id))
     text(0.4,0.5 , "Prolate", rotation=45, verticalalignment='center')
-    text(0.77,0.4 , "Oblate", rotation=90, verticalalignment='center')
-    text(0.63,0.78 , "Sphere", rotation=0, verticalalignment='center')
+    #text(np.max(b_a)+0.2,np.max(c_a)-0.2 , "Oblate", rotation=90, verticalalignment='center')
+    #text(0.63,0.78 , "Sphere", rotation=0, verticalalignment='center')
     b_a_ave=statistics.mean(b_a)
     c_a_ave=statistics.mean(c_a)
     b_a_std=np.std(b_a)
@@ -131,12 +134,12 @@ with open(f21, newline='') as csvfile:
 ####
 # 2nd plot
 
-with open(f22, newline='') as csvfile:
+with open(f20, newline='') as csvfile:
     reader = csv.reader(csvfile, delimiter=' ', quotechar='|')
     next(reader)
     next(reader)
     next(reader)
-    size=15 # I have to add a better way to get this number
+    #size=15 # I have to add a better way to get this number
     print("Number of bins:%d"%size)
     #declare variables
     R=[0]*size #for all plots
@@ -203,9 +206,10 @@ with open(f22, newline='') as csvfile:
     ax21.set_ylabel('c/a')
     ax21.scatter(b_a,c_a,marker='s',color='r',label='CoSANG')
     ax21.plot(b_a,b_a,'k',linestyle='-')#str(h.id))
-    text(0.4,0.5 , "Prolate", rotation=45, verticalalignment='center')
-    text(0.77,0.4 , "Oblate", rotation=90, verticalalignment='center')
-    text(0.63,0.78 , "Sphere", rotation=0, verticalalignment='center')
+    #text(0.4,0.5 , "Prolate", rotation=45, verticalalignment='center')
+    #text(0.77,0.4 , "Oblate", rotation=90, verticalalignment='center')
+    text(np.max(b_a)+0.1,np.max(c_a)-0.3 , "Oblate", rotation=90, verticalalignment='center')
+    #text(0.63,0.78 , "Sphere", rotation=0, verticalalignment='center')
     b_a_ave=statistics.mean(b_a)
     c_a_ave=statistics.mean(c_a)
     b_a_std=np.std(b_a)
