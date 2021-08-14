@@ -39,8 +39,8 @@ f16='/media/shahram/SD/Sample100Mpc/32251/High5M/z1.5/22045.0-C.csv'
 f17='/media/shahram/SD/Sample100Mpc/32251/High5M/z0.62/14003.0-G-30bin.csv'
 f18='/media/shahram/SD/Sample100Mpc/32251/High5M/z0.62/15486.0-C-30bin.csv'
 
-f19='/media/shahram/SD/Sample100Mpc/m12b/z0/6520-m12bGz0.csv'
-f20='/media/shahram/SD/Sample100Mpc/m12b/z0/4743-m12bCz0.csv'
+f19='/media/shahram/SD/Sample100Mpc/m12b/z0/6520-m12bGz0 (copy).csv'
+f20='/media/shahram/SD/Sample100Mpc/m12b/z0/4743-m12bCz0 (copy).csv'
 
 f21='/media/shahram/SD/Sample100Mpc/32251/High5M/z0.18/10096-32251Gz0.18.csv'
 f22='/media/shahram/SD/Sample100Mpc/32251/High5M/z0.18/11607-32251Cz0.18.csv'
@@ -48,14 +48,19 @@ f22='/media/shahram/SD/Sample100Mpc/32251/High5M/z0.18/11607-32251Cz0.18.csv'
 f23='/media/shahram/SD/Sample100Mpc/32251/High5M/z0/9678-32251Gz0.csv'
 f24='/media/shahram/SD/Sample100Mpc/32251/High5M/z0/9575-32251Cz0.csv'
 
+f25='/media/shahram/SD/Sample100Mpc/m12b/z0.3/7154-m12bGz0.3.csv'
+f26='/media/shahram/SD/Sample100Mpc/m12b/z0.3/5526-m12bCz0.3.csv'
+
+h_title='m12b,z=0'
+
 #open and plot
 
-with open(f19, newline='') as csvfile:
+with open(f20, newline='') as csvfile:
     reader = csv.reader(csvfile, delimiter=' ', quotechar='|')
     next(reader)
     next(reader)
     next(reader)
-    size=30 # I have to add a better way to get this number
+    size=29 # I have to add a better way to get this number
     print("Number of bins:%d"%size)
     #declare variables
     R=[0]*size #for all plots
@@ -97,7 +102,16 @@ with open(f19, newline='') as csvfile:
     ax11.plot(R,c_a,'b',linestyle='-',label="c/a")#str(h.id))
     #ax11.plot(R,b_aNoSub,'r',linestyle='-.',label="b/a-No Subhalo")#str(h.id))
     #ax11.plot(R,c_aNoSub,'b',linestyle='-.',label="c/a-No Subhalo")#str(h.id))
+    linestyles = ['-', ":"]
+    dummy_lines = []
+    for b_idx in range(0,2):# enumerate(np.unique(df["b"])):
+        dummy_lines.append(ax11.plot([],[], c="black", ls = linestyles[b_idx])[0])
+    legend2 = ax11.legend([dummy_lines[i] for i in [0,1]], ["CoSANG", "DMO"], loc=2)
+    ax11.add_artist(legend2)
     ax11.legend(loc=1)
+    #ax11.add_artist(legend2)
+    #text(5.,1.15 , " ̶  CoSANG", rotation=0, verticalalignment='center')
+    #text(5.,1.09 , ".. DMO", rotation=0, verticalalignment='center')
     ax12 = fig1.add_subplot(132)
     ax12.set_xlabel('R (kpc)')
     ax12.set_ylabel('Shape-Angular Momentum')
@@ -105,6 +119,8 @@ with open(f19, newline='') as csvfile:
     ax12.plot(R,AJ,'b',linestyle='-',label="$\hat{A}.\hat{L}$")#+str(h.id))
     ax12.plot(R,BJ,'r',linestyle='-',label="$\hat{B}.\hat{L}$")#+str(h.id))
     ax12.plot(R,CJ,'g',linestyle='-',label="$\hat{C}.\hat{L}$")#+str(h.id))
+    legend3 = ax12.legend([dummy_lines[i] for i in [0,1]], ["CoSANG", "DMO"], loc=1,ncol=2, bbox_to_anchor=(0.65,0.916))
+    ax12.add_artist(legend3)
     ax12.legend(loc=2,ncol=3)
     ax13 = fig1.add_subplot(133)
     ax13.set_xlabel('R (kpc)')
@@ -113,28 +129,31 @@ with open(f19, newline='') as csvfile:
     ax13.plot(R,AA0,'b',linestyle='-',label="$\hat{A}.\hat{A}_0$")#+str(h.id))
     ax13.plot(R,BB0,'r',linestyle='-',label="$\hat{B}.\hat{B}_0$")#+str(h.id))
     ax13.plot(R,CC0,'g',linestyle='-',label="$\hat{C}.\hat{C}_0$")#+str(h.id))
+    legend4 = ax13.legend([dummy_lines[i] for i in [0,1]], ["CoSANG", "DMO"], loc=4)
+    ax13.add_artist(legend4)
     ax13.legend(loc=3)
     print(R)
     print(b_a)
     fig2=plt.figure(2,figsize=plt.figaspect(1.))
     ax21 = fig2.add_subplot(111)
+    ax21.title.set_text(h_title)
     ax21.set_xlabel('b/a')
     ax21.set_ylabel('c/a')
-    ax21.scatter(b_a,c_a,marker='o',color='b',label='Gadget')
+    ax21.scatter(b_a,c_a,marker='o',color='b',label='CoSANG')
     #ax21.plot(b_a,b_a,'r',linestyle='-',label="Prolate")#str(h.id))
-    text(0.4,0.5 , "Prolate", rotation=45, verticalalignment='center')
+    text(0.66,0.696 , "Prolate", rotation=45, verticalalignment='center')
     #text(np.max(b_a)+0.2,np.max(c_a)-0.2 , "Oblate", rotation=90, verticalalignment='center')
     #text(0.63,0.78 , "Sphere", rotation=0, verticalalignment='center')
     b_a_ave=statistics.mean(b_a)
     c_a_ave=statistics.mean(c_a)
     b_a_std=np.std(b_a)
     c_a_std=np.std(c_a)
-    ax21.errorbar(b_a_ave, c_a_ave, b_a_std,c_a_std, linestyle='None', marker='x',label='Gadget')
+    ax21.errorbar(b_a_ave, c_a_ave, b_a_std,c_a_std, linestyle='None', marker='x',label='CoSANG')
     #plt.show()
 ####
 # 2nd plot
 
-with open(f20, newline='') as csvfile:
+with open(f19, newline='') as csvfile:
     reader = csv.reader(csvfile, delimiter=' ', quotechar='|')
     next(reader)
     next(reader)
@@ -177,34 +196,37 @@ with open(f20, newline='') as csvfile:
     ax11.set_xlabel('R (kpc)')
     ax11.set_ylabel('Axis Ratio')
     ax11.set_ylim(0,1.2)
-    ax11.plot(R,b_a,'r',linestyle='-.',label="b/a")#str(h.id))
-    ax11.plot(R,c_a,'b',linestyle='-.',label="c/a")#str(h.id))
+    ax11.plot(R,b_a,'r',linestyle=':',label="b/a")#str(h.id))
+    ax11.plot(R,c_a,'b',linestyle=':',label="c/a")#str(h.id))
+    ax11.title.set_text(h_title)
     #ax11.plot(R,b_aNoSub,'r',linestyle='-.',label="b/a-No Subhalo")#str(h.id))
     #ax11.plot(R,c_aNoSub,'b',linestyle='-.',label="c/a-No Subhalo")#str(h.id))
-    ax11.legend(loc=1)
+    #ax11.legend(loc=1)
     #ax12 = fig1.add_subplot(132)
     #ax12.set_xlabel('R (kpc)')
     #ax12.set_ylabel('Shape-Angular Momentum')
     ax12.set_ylim(0,1.2)
-    ax12.plot(R,AJ,'b',linestyle='-.',label="$\hat{A}.\hat{L}$")#+str(h.id))
-    ax12.plot(R,BJ,'r',linestyle='-.',label="$\hat{B}.\hat{L}$")#+str(h.id))
-    ax12.plot(R,CJ,'g',linestyle='-.',label="$\hat{C}.\hat{L}$")#+str(h.id))
-    ax12.legend(loc=2,ncol=3)
+    ax12.plot(R,AJ,'b',linestyle=':',label="$\hat{A}.\hat{L}$")#+str(h.id))
+    ax12.plot(R,BJ,'r',linestyle=':',label="$\hat{B}.\hat{L}$")#+str(h.id))
+    ax12.plot(R,CJ,'g',linestyle=':',label="$\hat{C}.\hat{L}$")#+str(h.id))
+    ax12.title.set_text(h_title)
+    #ax12.legend(loc=2,ncol=3)
     #ax13 = fig1.add_subplot(133)
     #ax13.set_xlabel('R (kpc)')
     #ax13.set_ylabel('Residual Orientation')
     ax13.set_ylim(0,1.2)
-    ax13.plot(R,AA0,'b',linestyle='-.',label="$\hat{A}.\hat{A}_0$")#+str(h.id))
-    ax13.plot(R,BB0,'r',linestyle='-.',label="$\hat{B}.\hat{B}_0$")#+str(h.id))
-    ax13.plot(R,CC0,'g',linestyle='-.',label="$\hat{C}.\hat{C}_0$")#+str(h.id))
-    ax13.legend(loc=3)
+    ax13.plot(R,AA0,'b',linestyle=':',label="$\hat{A}.\hat{A}_0$")#+str(h.id))
+    ax13.plot(R,BB0,'r',linestyle=':',label="$\hat{B}.\hat{B}_0$")#+str(h.id))
+    ax13.plot(R,CC0,'g',linestyle=':',label="$\hat{C}.\hat{C}_0$")#+str(h.id))
+    ax13.title.set_text(h_title)
+    #ax13.legend(loc=3)
     print(R)
     print(b_a)
     fig2=plt.figure(2,figsize=plt.figaspect(1.))
     #ax21 = fig2.add_subplot(111)
     ax21.set_xlabel('b/a')
     ax21.set_ylabel('c/a')
-    ax21.scatter(b_a,c_a,marker='s',color='r',label='CoSANG')
+    ax21.scatter(b_a,c_a,marker='s',color='r',label='DMO')
     ax21.plot(b_a,b_a,'k',linestyle='-')#str(h.id))
     #text(0.4,0.5 , "Prolate", rotation=45, verticalalignment='center')
     #text(0.77,0.4 , "Oblate", rotation=90, verticalalignment='center')
@@ -214,6 +236,6 @@ with open(f20, newline='') as csvfile:
     c_a_ave=statistics.mean(c_a)
     b_a_std=np.std(b_a)
     c_a_std=np.std(c_a)
-    ax21.errorbar(b_a_ave, c_a_ave, b_a_std,c_a_std, linestyle='None', marker='x',label='CoSANG')
+    ax21.errorbar(b_a_ave, c_a_ave, b_a_std,c_a_std, linestyle='None', marker='x',label='DMO')
     ax21.legend(loc=2)
     plt.show()
