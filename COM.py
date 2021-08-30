@@ -35,8 +35,8 @@ import csv
 
 plt.rcParams["font.size"] =12
 
-    #how to run: python ShapeAnalysis.py snapshot_file halo_catalog particles_list check_contamination extract_shape bin_number iteration
-    #example: $python ShapeAnalysisV2.py snap_264 halos_0.0.ascii halos_0.0.particles 1.4e12 1.1e12   1 1 5 3
+    #how to run: python COM.py snapshot_file
+    #example: $python COM.py snap_264
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("snap", type=str)

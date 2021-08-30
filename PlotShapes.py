@@ -51,16 +51,19 @@ f24='/media/shahram/SD/Sample100Mpc/32251/High5M/z0/9575-32251Cz0.csv'
 f25='/media/shahram/SD/Sample100Mpc/m12b/z0.3/7154-m12bGz0.3.csv'
 f26='/media/shahram/SD/Sample100Mpc/m12b/z0.3/5526-m12bCz0.3.csv'
 
-h_title='m12b,z=0'
+f27='/media/shahram/SD/Sample100Mpc/m12b/z1.5/14449-m12bGz1.5.csv'
+f28='/media/shahram/SD/Sample100Mpc/m12b/z1.5/13622-m12bCz1.5.csv'
+
+h_title='m12b,z=0.3'
 
 #open and plot
 
-with open(f20, newline='') as csvfile:
+with open(f28, newline='') as csvfile:
     reader = csv.reader(csvfile, delimiter=' ', quotechar='|')
     next(reader)
     next(reader)
     next(reader)
-    size=29 # I have to add a better way to get this number
+    size=21 # I have to add a better way to get this number
     print("Number of bins:%d"%size)
     #declare variables
     R=[0]*size #for all plots
@@ -153,7 +156,7 @@ with open(f20, newline='') as csvfile:
 ####
 # 2nd plot
 
-with open(f19, newline='') as csvfile:
+with open(f27, newline='') as csvfile:
     reader = csv.reader(csvfile, delimiter=' ', quotechar='|')
     next(reader)
     next(reader)
